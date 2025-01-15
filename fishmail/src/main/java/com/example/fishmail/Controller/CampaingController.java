@@ -79,7 +79,7 @@ public class CampaingController {
           
         }
 
-        List<CampaignModel> campaingList = campaingService.getAllCampaings();
+        List<CampaignModel> campaingList = accountModel.getCampaing();
           // Mapowanie kampanii na dane tabeli
         List<Map<String, Object>> tableData = dynamicDataService.mapEntitiesToTable(campaingList);
 
