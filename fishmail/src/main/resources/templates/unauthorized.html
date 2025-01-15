@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+  lang="pl"
+>
+  <head th:include="~{fragments/head.html :: headerfiles}"> </head>
+  <body>
+    <div
+      class="container-fluid d-flex flex-column justify-content-center align-self-center align-items-center unauthorized"
+    >
+      <h1 class="unathorized_message">
+        Nie posiadasz uprawnień do takiego działania!!!
+      </h1>
+      <div class="d-flex mt-3 mb-3">
+        <img
+          th:src="@{/image/fishweb_logotyp.svg}"
+          class="unauthorized_image"
+          alt="FishWeB logo"
+        />
+      </div>
+      <a class="unathorized_link" th:href="@{/}">Grzeczny powrót...</a>
+    </div>
+    <div th:replace="~{fragments/footer.html :: footer}"></div>
+  </body>
+</html>

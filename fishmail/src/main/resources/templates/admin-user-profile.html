@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+  lang="pl"
+>
+  <head th:include="~{fragments/head.html :: headerfiles}"> </head>
+
+  <body>
+    <div th:replace="~{fragments/navbar.html :: nav_base}"></div>
+    <div class="container">
+      <div class="main-body">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="main-breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item">
+              <a href="javascript:void(0)">User</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+              User Profile
+            </li>
+          </ol>
+        </nav>
+        <!-- /Breadcrumb -->
+
+        <div class="row gutters-sm">
+          <div class="col-md-4 mb-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex flex-column align-items-center text-center">
+                  <img
+                    src="https://bootdey.com/img/Content/avatar/avatar7.png"
+                    alt="Admin"
+                    class="rounded-circle"
+                    width="150"
+                  />
+                  <div class="mt-3">
+                    <h4 th:text="${userProfile.name}">UserName</h4>
+                    <p class="text-secondary mb-1">Użytkownik</p>
+                    <p
+                      class="text-muted font-size-sm"
+                      th:text="'Konto ważne do ' + ${#temporals.format(userProfile.validAccountTime, 'dd-MM-yyyy')}"
+                    >
+                      Ważność konta
+                    </p>
+                    <p
+                      class="text-muted font-size-sm"
+                      th:text="'Utworzono ' + ${#temporals.format(userProfile.createdaccountTime, 'dd-MM-yyyy')}"
+                    >
+                      Utworzono
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card mt-3">
+              <ul class="list-group list-group-flush">
+                <li
+                  class="list-group-item d-flex justify-content-between align-items-center flex-wrap"
+                >
+                  <h6 class="mb-0">Liczba kampanii</h6>
+                  <span
+                    class="text-secondary"
+                    th:text="${userProfile.campaing.size()}"
+                    >Numer Kampanii</span
+                  >
+                </li>
+                <li
+                  class="list-group-item d-flex justify-content-between align-items-center flex-wrap"
+                >
+                  <h6 class="mb-0">Liczba kampanii w trakcie</h6>
+                  <span
+                    class="text-secondary"
+                    th:text="${accountPrevCampaingInProgess}"
+                    >Liczba kampanii w trakcie</span
+                  >
+                </li>
+                <li
+                  class="list-group-item d-flex justify-content-between align-items-center flex-wrap"
+                >
+                  <h6 class="mb-0">Liczba kampanii zakończonych</h6>
+                  <span
+                    class="text-secondary"
+                    th:text="${accountPrevCampaingDone}"
+                    >Liczba kampanii zakończonych</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="card mb-3">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Nazwa</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    <p th:text="${userProfile.name}">Nazwa Użytkownika</p>
+                  </div>
+                </div>
+                <hr />
+                <div class="row">
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Hasło do konta</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    <p th:text="${userProfile.password}">Hasło do Profilu</p>
+                  </div>
+                </div>
+                <hr />
+                <div class="row">
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Adres email</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    <p th:text="${userProfile.email}">
+                      Adres email użytkownika
+                    </p>
+                  </div>
+                </div>
+                <hr />
+                <div class="row">
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Adres hosta poczty wychodzącej</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    <p th:text="${userProfile.smtpHost}">Adres hosta smtp</p>
+                  </div>
+                </div>
+                <hr />
+                <div class="row">
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Login serwera poczty wychodzącej</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    <p th:text="${userProfile.smtpLogin}">
+                      Login serwera poczty wychodzącej
+                    </p>
+                  </div>
+                </div>
+                <hr />
+                <div class="row">
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Hasło do serwera poczty wychodzącej</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    <p th:text="${userProfile.smtpPassword}">
+                      Login serwera poczty wychodzącej
+                    </p>
+                  </div>
+                </div>
+                <hr />
+                <div class="row">
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Port do serwera poczty wychodzącej</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    <p th:text="${userProfile.smtpPort}">
+                      Login serwera poczty wychodzącej
+                    </p>
+                  </div>
+                </div>
+                <hr />
+                <div class="row">
+                  <div class="col-sm-12">
+                    <a
+                      class="btn btn-info"
+                      target="__blank"
+                      th:href="@{'/admin/fishmail/edytuj-konto/' + ${userProfile.id}"
+                      >Edytuj profil</a
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script></script>
+  </body>
+</html>

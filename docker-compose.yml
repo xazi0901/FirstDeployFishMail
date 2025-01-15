@@ -1,0 +1,64 @@
+services:
+  psql-db-fishmail:
+    image: postgres:latest
+    container_name: psql-db-fishmail
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_SECRET_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DATABASE_NAME}
+    volumes:
+      - ./blog-data:/var/lib/postgresql/data
+      - ./postgres-init/zrzut.sql:/docker-entrypoint-initdb.d/zrzut.sql:ro
+    ports:
+      - "${PSQL_DB_PORT}:5432"
+
+  rabbitmq:
+    image: rabbitmq:4.0-management
+    container_name: "rabbitmq"
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+
+  fishmail:
+    container_name: fishmail
+    image: fishmail-ssl:latest
+    restart: always
+    expose:
+      - ${SPRING_PORT_EXPOSE}
+    environment:
+      - SPRING_DATASOURCE_URL=${SPRING_DATA_URL}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_USERNAME_DATA}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_USER_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=${SPRING_JPA}
+    depends_on:
+      - psql-db-fishmail
+      - rabbitmq
+    deploy:
+      resources:
+        limits:
+          memory: 1000M
+        reservations:
+          memory: 150M
+
+  nginx-proxy:
+    image: "jc21/nginx-proxy-manager:latest"
+    restart: unless-stopped
+    ports:
+      - "${NGINX_SOME_STUFFS}:80"
+      - "${NGINX_SOME_SHITTY_STUFFS}:81"
+      - "${NGINX_SOME_CRAZY_SHITTY_STUFFS}:443"
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    depends_on:
+      - fishmail
+    deploy:
+      resources:
+        limits:
+          memory: 300M
+        reservations:
+          memory: 50M

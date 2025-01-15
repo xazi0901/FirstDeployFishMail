@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+  lang="pl"
+>
+  <head th:include="~{fragments/head.html :: headerfiles}"> </head>
+
+  <body>
+    <div th:replace="~{fragments/navbar.html :: nav_base}"></div>
+    <h1>Lista odbiorców kampanii</h1>
+
+    <div class="container">
+      <!-- TESTY Z DYNAMICZNYMI TABELAMI -->
+      <div style="border: 1px solid red">
+        <p>Nie używaj tego</p>
+        <div
+          th:replace="fragments/table.html :: dynamicTable(columns=${columns}, rows=${rows}, title='Twoje Kampanie')"
+        ></div>
+      </div>
+      <!-- KONIEC TESTY Z DYNAMICZNYMI TABELAMI -->
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="main-box no-header clearfix">
+            <div class="main-box-body clearfix">
+              <div class="table-responsive">
+                <table class="table user-list">
+                  <thead>
+                    <tr>
+                      <th><span>Numer porządkowy</span></th>
+                      <th><span>Adres email</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr th:each="reciever : ${recieversList}">
+                      <td th:text="${reciever.id}">
+                        Numer porządkowy odbiorcy
+                      </td>
+                      <td th:text="${reciever.recieverEmail}">Adres email</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const formMail = document.getElementById("mailSend");
+
+      let title = document.getElementById("title");
+      // Pobierz zawartość edytora TinyMCE
+      let body = document.getElementById("body");
+      let date = document.getElementById("sendDate");
+      let time = document.getElementById("sendTime");
+      const mailBody = {
+        title: title.value,
+        body: body.value,
+        sendDate: date.value,
+        sendTime: time.value,
+      };
+
+      formMail.addEventListener("submit", (e) => {
+        e.preventDefault();
+        console.log(mailBody);
+        fetch("/send-email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(mailBody),
+        })
+          .then((answer) => {})
+          .catch((err) => {
+            console.log(err);
+          });
+      });
+
+      const scheduleMail = document.getElementById("schedule");
+
+      let date1 = document.getElementById("sendDate1");
+      let time1 = document.getElementById("sendTime1");
+      const mailBody1 = {
+        sendDate1: date1.value,
+        sendTime1: time1.value,
+      };
+
+      scheduleMail.addEventListener("submit", (e) => {
+        e.preventDefault();
+        console.log(mailBody1);
+        fetch("/schedule", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(mailBody1),
+        })
+          .then((answer) => {})
+          .catch((err) => {
+            console.log(err);
+          });
+      });
+    </script>
+  </body>
+</html>

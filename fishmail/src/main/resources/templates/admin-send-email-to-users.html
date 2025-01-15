@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+  lang="pl"
+>
+  <head th:include="~{fragments/head.html :: headerfiles}"> </head>
+
+  <body>
+    <div th:replace="~{fragments/navbar.html :: nav_base}"></div>
+    <div class="container">
+    <form
+      th:action="@{/zapisz-kampanie}"
+      method="POST"
+      th:object="${campaingModel}"
+      enctype="multipart/form-data"
+    >
+    <h1>Wyślij wiadomość do użytkowników serwisu</h1>
+    <div class="d-flex flex-wrap justify-content-between main-body">
+      <div class="d-flex flex-column card" style="flex:1 1 0">
+      <div class="card-body">
+      <input type="hidden" value="${loggedUser}" />  
+      </div>
+      </div>
+      <div class="d-flex flex-column card" style="flex:1 1 0">
+        <div class="card-body">
+        <div class="row justify-content-around">
+          <div class="col-sm-3">
+            <label for="emails[0].title">Temat Emaila</label>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            <input type="text" name="emails[0].title" value="Email Title 1" />
+          </div>
+        </div>
+        <hr/>
+        <div class="row justify-content-around">
+          <div class="col-sm-3">
+            <label for="emails[0].messageBody">Treść Wiadomości</label>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            <textarea name="emails[0].messageBody">Email Body 1</textarea>
+          </div>
+        </div>
+        <hr/>
+
+
+
+        </div>
+              <button type="submit">Utwórz</button>
+    </div>
+    </div>
+    </form>
+    <div>
+    <script></script>
+  </body>
+</html>

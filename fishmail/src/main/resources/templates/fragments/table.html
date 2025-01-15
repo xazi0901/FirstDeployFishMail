@@ -1,0 +1,24 @@
+<div class="col-lg-12" th:fragment="dynamicTable(columns, rows,title)">
+  <h2 th:text="${title}"></h2>
+  <div class="main-box no-header clearfix">
+    <div class="main-box-body clearfix">
+      <div class="table-responsive">
+        <table class="table user-list">
+          <thead>
+            <tr>
+              <th th:each="column : ${columns}" th:text="${column}"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="row : ${rows}">
+              <td th:each="cell : ${row.values()}" th:text="${cell}"></td>
+              <td style="width: 20%">
+                <p>Blabal</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

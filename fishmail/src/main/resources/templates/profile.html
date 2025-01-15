@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+  lang="pl"
+>
+  <head th:include="~{fragments/head.html :: headerfiles}"> </head>
+
+  <body>
+    <div th:replace="~{fragments/navbar.html :: nav_base}"></div>
+    <div class="container">
+      <div class="main-body">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="main-breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item">
+              <a href="javascript:void(0)">User</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+              User Profile
+            </li>
+          </ol>
+        </nav>
+        <!-- /Breadcrumb -->
+
+        <div class="row gutters-sm">
+          <div class="col-md-4 mb-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex flex-column align-items-center text-center">
+                  <img
+                    src="https://bootdey.com/img/Content/avatar/avatar7.png"
+                    alt="Admin"
+                    class="rounded-circle"
+                    width="150"
+                  />
+                  <div class="mt-3">
+                    <h4 th:text="${accountPrev.name}">UserName</h4>
+                    <p class="text-secondary mb-1">Użytkownik</p>
+                    <p
+                      class="text-muted font-size-sm"
+                      th:text="'Konto ważne do ' + ${#temporals.format(accountPrev.validAccountTime, 'dd-MM-yyyy')}"
+                    >
+                      Ważność konta
+                    </p>
+                    <p
+                      class="text-muted font-size-sm"
+                      th:text="'Utworzono ' + ${#temporals.format(accountPrev.createdaccountTime, 'dd-MM-yyyy')}"
+                    >
+                      Utworzono
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card mt-3">
+              <ul class="list-group list-group-flush">
+                <li
+                  class="list-group-item d-flex justify-content-between align-items-center flex-wrap"
+                >
+                  <h6 class="mb-0">Liczba kampanii</h6>
+                  <span
+                    class="text-secondary"
+                    th:text="${accountPrev.campaing.size()}"
+                    >Numer Kampanii</span
+                  >
+                </li>
+                <li
+                  class="list-group-item d-flex justify-content-between align-items-center flex-wrap"
+                >
+                  <h6 class="mb-0">Liczba kampanii w trakcie</h6>
+                  <span
+                    class="text-secondary"
+                    th:text="${accountPrevCampaingInProgess}"
+                    >Liczba kampanii w trakcie</span
+                  >
+                </li>
+                <li
+                  class="list-group-item d-flex justify-content-between align-items-center flex-wrap"
+                >
+                  <h6 class="mb-0">Liczba kampanii zakończonych</h6>
+                  <span
+                    class="text-secondary"
+                    th:text="${accountPrevCampaingDone}"
+                    >Liczba kampanii zakończonych</span
+                  >
+                </li>
+                <li
+                  class="list-group-item d-flex justify-content-between align-items-center flex-wrap"
+                >
+                  <h6 class="mb-0">Kontakt z obsługą</h6>
+                  <span class="text-secondary"
+                    >NUMER TELEFONU DO OBSŁUGI SERWISU</span
+                  >
+                </li>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="card mb-3">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Nazwa</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    <p th:text="${accountPrev.name}">Nazwa Użytkownika</p>
+                  </div>
+                </div>
+                <hr />
+                <div class="row">
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Hasło do konta</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    <p th:text="${accountPrev.password}">Hasło do Profilu</p>
+                  </div>
+                </div>
+                <hr />
+                <div class="row">
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Adres email</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    <p th:text="${accountPrev.email}">
+                      Adres email użytkownika
+                    </p>
+                  </div>
+                </div>
+                <hr />
+                <div class="row">
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Adres hosta poczty wychodzącej</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    <p th:text="${accountPrev.smtpHost}">Adres hosta smtp</p>
+                  </div>
+                </div>
+                <hr />
+                <div class="row">
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Login serwera poczty wychodzącej</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    <p th:text="${accountPrev.smtpLogin}">
+                      Login serwera poczty wychodzącej
+                    </p>
+                  </div>
+                </div>
+                <hr />
+                <div class="row">
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Hasło do serwera poczty wychodzącej</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    <p th:text="${accountPrev.smtpPassword}">
+                      Login serwera poczty wychodzącej
+                    </p>
+                  </div>
+                </div>
+                <hr />
+                <div class="row">
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Port do serwera poczty wychodzącej</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    <p th:text="${accountPrev.smtpPort}">
+                      Login serwera poczty wychodzącej
+                    </p>
+                  </div>
+                </div>
+                <hr />
+                <div class="row">
+                  <div class="col-sm-12">
+                    <a
+                      class="btn btn-info"
+                      target="__blank"
+                      th:href="@{/profil/edytuj}"
+                      >Edytuj profil</a
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row gutters-sm">
+              <div class="col-sm-6 mb-3">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <h6 class="d-flex align-items-center mb-3">
+                      <i class="material-icons text-info mr-2">assignment</i
+                      >Project Status
+                    </h6>
+                    <small>Web Design</small>
+                    <div class="progress mb-3" style="height: 5px">
+                      <div
+                        class="progress-bar bg-primary"
+                        role="progressbar"
+                        style="width: 80%"
+                        aria-valuenow="80"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      ></div>
+                    </div>
+                    <small>Website Markup</small>
+                    <div class="progress mb-3" style="height: 5px">
+                      <div
+                        class="progress-bar bg-primary"
+                        role="progressbar"
+                        style="width: 72%"
+                        aria-valuenow="72"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      ></div>
+                    </div>
+                    <small>One Page</small>
+                    <div class="progress mb-3" style="height: 5px">
+                      <div
+                        class="progress-bar bg-primary"
+                        role="progressbar"
+                        style="width: 89%"
+                        aria-valuenow="89"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      ></div>
+                    </div>
+                    <small>Mobile Template</small>
+                    <div class="progress mb-3" style="height: 5px">
+                      <div
+                        class="progress-bar bg-primary"
+                        role="progressbar"
+                        style="width: 55%"
+                        aria-valuenow="55"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      ></div>
+                    </div>
+                    <small>Backend API</small>
+                    <div class="progress mb-3" style="height: 5px">
+                      <div
+                        class="progress-bar bg-primary"
+                        role="progressbar"
+                        style="width: 66%"
+                        aria-valuenow="66"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 mb-3">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <h6 class="d-flex align-items-center mb-3">
+                      <i class="material-icons text-info mr-2">assignment</i
+                      >Project Status
+                    </h6>
+                    <small>Web Design</small>
+                    <div class="progress mb-3" style="height: 5px">
+                      <div
+                        class="progress-bar bg-primary"
+                        role="progressbar"
+                        style="width: 80%"
+                        aria-valuenow="80"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      ></div>
+                    </div>
+                    <small>Website Markup</small>
+                    <div class="progress mb-3" style="height: 5px">
+                      <div
+                        class="progress-bar bg-primary"
+                        role="progressbar"
+                        style="width: 72%"
+                        aria-valuenow="72"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      ></div>
+                    </div>
+                    <small>One Page</small>
+                    <div class="progress mb-3" style="height: 5px">
+                      <div
+                        class="progress-bar bg-primary"
+                        role="progressbar"
+                        style="width: 89%"
+                        aria-valuenow="89"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      ></div>
+                    </div>
+                    <small>Mobile Template</small>
+                    <div class="progress mb-3" style="height: 5px">
+                      <div
+                        class="progress-bar bg-primary"
+                        role="progressbar"
+                        style="width: 55%"
+                        aria-valuenow="55"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      ></div>
+                    </div>
+                    <small>Backend API</small>
+                    <div class="progress mb-3" style="height: 5px">
+                      <div
+                        class="progress-bar bg-primary"
+                        role="progressbar"
+                        style="width: 66%"
+                        aria-valuenow="66"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="">
+      <a th:href="@{/edytuj-profil}">Nowa kampania</a>
+    </div>
+    <script></script>
+  </body>
+</html>

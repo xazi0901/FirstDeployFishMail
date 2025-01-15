@@ -1,0 +1,129 @@
+<div class="sticky-top container-fluid nav_container" th:fragment="nav_base">
+    <nav class="navbar navbar-expand-lg">
+        <h3 class="semanticHeader">Nawigacja po serwisie FIshMail</h3>
+        <div class="container">
+            <a class="navbar-brand" th:href="@{'/'}">FishMail</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample"
+                aria-controls="offcanvasExample" aria-label="Przycisk otwierający nawigację mobilną.">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" th:href="@{'/'}">Strona główna</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" th:href="@{/kampanie}">Kampanie</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" th:href="@{/nowa-kampania}">Nowa kampania</a>
+                    </li>                    
+                </ul>
+                <ul class="navbar-nav" sec:authorize="!isAuthenticated()">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/zaloguj}">Logowanie</a>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
+                        <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false" sec:authentication="name">
+                            Nazwa użytkownika
+                        </a>
+                        <ul class="dropdown-menu offcanvas_nav_account_ul">
+                            <li sec:authorize="hasRole('ROLE_ADMIN')">
+                                <a class="dropdown-item" th:href="@{'/admin/fishmail'}">Admin Dashboard</a>
+                            </li>
+                            <li sec:authorize="hasRole('ROLE_ADMIN')">
+                                <a class="dropdown-item" th:href="@{'/admin/fishmail/nowe-konto'}">Załóż Konto</a>
+                            </li>
+                            <li sec:authorize="hasRole('ROLE_ADMIN')">
+                                <a class="dropdown-item" th:href="@{'/admin/fishmail/uzytkownicy-wyslij-wiadomosc'}">Wiadomość serwisu</a>
+                            </li>                                                       
+                            <li>
+                                <a class="dropdown-item" th:href="@{'/profil'}">Mój Profil</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" th:href="@{'/kampanie'}">Moje Kampanie</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" th:href="@{'/profil/edytuj'}">Edytuj Profil</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider navbar_account_nav_dividier" />
+                            </li>
+                            <li>
+                                <form th:action="@{/wyloguj}" method="POST">
+                                    <button class="dropdown-item offcanvas_nav_logout" type="submit">
+                                        Wyloguj
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </ul>
+                </li>
+            </div>
+        </div>
+    </nav>
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+        <div class="offcanvas-header">
+            <div class="icons">
+                <a href="https://www.facebook.com/profile.php?id=100084920133269" alt="Profil facebook firmy FishWeb"><i class="bi bi-facebook"></i></a>
+                <a
+                    href="https://www.instagram.com/fishweb_pl/" alt="Profil instagram firmy FishWeb"><i
+                        class="bi bi-instagram"></i></a>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body offcanvas_nav_body">
+            <ul class="navbar-nav me-auto mx-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" th:href="@{'/'}">Strona główna</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" th:href="@{/nowa-kampania}">Nowa Kampania</a>
+                </li>
+                <li class="nav-item dropdown offcanvas_nav_account" sec:authorize="isAuthenticated()">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false" sec:authentication="name">
+                        Nazwa użytkownika
+                    </a>
+                    <ul class="dropdown-menu offcanvas_nav_account_ul">
+                            <li sec:authorize="hasRole('ROLE_ADMIN')">
+                                <a class="dropdown-item" th:href="@{'/admin/fishmail'}">Admin Dashboard</a>
+                            </li>
+                            <li sec:authorize="hasRole('ROLE_ADMIN')">
+                                <a class="dropdown-item" th:href="@{'/admin/fishmail/nowe-konto'}">Załóż Konto</a>
+                            </li>
+                            <li sec:authorize="hasRole('ROLE_ADMIN')">
+                                <a class="dropdown-item" th:href="@{'/admin/fishmail/uzytkownicy-wyslij-wiadomosc'}">Wiadomość serwisu</a>
+                            </li>
+                             <li>
+                                <a class="dropdown-item" th:href="@{'/profil'}">Mój Profil</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" th:href="@{'/kampanie'}">Moje Kampanie</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" th:href="@{'/profil/edytuj'}">Edytuj Profil</a>
+                            </li>
+                        <li>
+                            <hr class="dropdown-divider navbar_account_nav_dividier" />
+                        </li>
+                        <li>
+                            <form th:action="@{/wyloguj}" method="POST">
+                                <button class="dropdown-item offcanvas_nav_logout" type="submit">Wyloguj</button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="d-flex justify-content-center align-items-end fish_nav_container">
+                <a class="footerFishNav"
+                    href="https://www.facebook.com/profile.php?id=100084920133269" alt="Przejdź do profilu facebook firmy FishWeB">Powered&nbsp;by:&nbsp;<img
+                        class="fishLogo" th:src="@{/image/fishweb_logotyp.svg}" alt="Logo firmy FishWeB" /></a>
+            </div>
+        </div>
+    </div>
+</div>

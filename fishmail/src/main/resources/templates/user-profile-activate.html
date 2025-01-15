@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+  lang="pl"
+>
+  <head th:include="~{fragments/head.html :: headerfiles}"> </head>
+
+  <body>
+    <div th:replace="~{fragments/navbar.html :: nav_base}"></div>
+
+    <div class="container mt-5 mb-5 d-flex justify-content-center">
+      <form
+        th:action="@{'/aktywuj/' + ${activationId}}"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+        <div class="card px-1 py-4" id="card-activation">
+          <div
+            class="card-body d-flex justify-content-center flex-column align-items-center"
+            id="card-body-activation"
+          >
+            <h6 class="card-title mb-3" id="card-title-activation">
+              Aktywuj konto
+            </h6>
+            <input
+              type="hidden"
+              th:value="${activationId}"
+              name="activationId"
+              id="activationId"
+            />
+            <div class="d-flex flex-column text-center px-5 mt-3 mb-3">
+              <small class="agree-text">Aktywujac konto akceptujesz</small>
+              <a href="#" class="terms">Regulamin Korzystania z Serwisu</a>
+            </div>
+            <button
+              class="btn btn-primary btn-block confirm-button"
+              type="submit"
+            >
+              Aktywuj konto
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>

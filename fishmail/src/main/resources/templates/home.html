@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+  lang="pl"
+>
+  <head th:include="~{fragments/head.html :: headerfiles}"> </head>
+
+  <body>
+    <div th:replace="~{fragments/navbar.html :: nav_base}"></div>
+
+    <div class="container">
+      <h1>Twoja platforma do email marketingu!</h1>
+    </div>
+
+    <!-- <script> 
+      const formMail = document.getElementById("mailSend");
+
+      let title = document.getElementById("title");
+      // Pobierz zawartość edytora TinyMCE
+      let body = document.getElementById("body");
+      let date = document.getElementById("sendDate");
+      let time = document.getElementById("sendTime");
+      const mailBody = {
+        title: title.value,
+        body: body.value,
+        sendDate: date.value,
+        sendTime: time.value,
+      };
+
+      formMail.addEventListener("submit", (e) => {
+        e.preventDefault();
+        console.log(mailBody);
+        fetch("/send-email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(mailBody),
+        })
+          .then((answer) => {})
+          .catch((err) => {
+            console.log(err);
+          });
+      });
+
+      const scheduleMail = document.getElementById("schedule");
+
+      let date1 = document.getElementById("sendDate1");
+      let time1 = document.getElementById("sendTime1");
+      const mailBody1 = {
+        sendDate1: date1.value,
+        sendTime1: time1.value,
+      };
+
+      scheduleMail.addEventListener("submit", (e) => {
+        e.preventDefault();
+        console.log(mailBody1);
+        fetch("/schedule", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(mailBody1),
+        })
+          .then((answer) => {})
+          .catch((err) => {
+            console.log(err);
+          });
+      });
+    </script> -->
+  </body>
+</html>

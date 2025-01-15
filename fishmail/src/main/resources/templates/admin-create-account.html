@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+  lang="pl"
+>
+  <head th:include="~{fragments/head.html :: headerfiles}"> </head>
+
+  <body>
+    <div th:replace="~{fragments/navbar.html :: nav_base}"></div>
+    <div class="container">
+    <form
+      th:action="@{/admin/fishmail/stworz-konto}"
+      method="POST"
+      th:object="${newAccount}"
+      enctype="multipart/form-data"
+    >
+    <h1>Utwórz Konto</h1>
+    <div class="d-flex flex-wrap justify-content-between main-body">
+      <div class="d-flex flex-column card" style="flex:1 1 0">
+      <div class="card-body">
+      <input type="hidden" value="${loggedUser}" />
+        <div class="row justify-content-around">
+          <div class="col-sm-3">
+            <label for="name" >Email użytkownika</label>
+          </div>
+          <div class="col-sm-9 text-secondary">
+              <input type="text" th:field="*{email}" id="email" />
+          </div>
+
+        </div>
+        <hr />
+        <div class="row justify-content-around">
+          <div class="col-sm-3">
+            <label for="name" >Nazwa użytkownika</label>
+          </div>
+          <div class="col-sm-9 text-secondary">
+              <input type="text" th:field="*{name}" id="name" />
+          </div>
+        </div>
+        <button type="submit">Utwórz konto!</button>
+        </div>      
+      </div>
+      </div>
+
+    </div>
+    </form>
+    <div>
+  </body>
+</html>
+
