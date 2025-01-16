@@ -7,6 +7,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -64,7 +65,7 @@ public class WebSecurityConfig {
             customizer.requestMatchers(HttpMethod.POST,"/aktywuj-konto/zapisz-haslo/**").permitAll(); // Procesuj ustawienie hasła po aktywacji konta
             customizer.requestMatchers(HttpMethod.GET,"/wyslij-link-aktywacyjny**").permitAll(); // Wyślij ponownie link aktywacyjny do konta
             customizer.requestMatchers(HttpMethod.POST,"/link-aktywacyjny**").permitAll(); // Procesuj wysłanie ponownego wysłania linku aktywacyjnego
-
+            customizer.requestMatchers(HttpMethod.GET,"/zaloguj**").permitAll();
             //
             // ADMIN OBSŁUGA SERWISU
             customizer.requestMatchers(HttpMethod.GET,"/admin/fishmail").hasAnyRole("ADMIN"); // Strona admina dashboard
@@ -87,11 +88,18 @@ public class WebSecurityConfig {
             .loginProcessingUrl("/zaloguj")
             .usernameParameter("email")
             .passwordParameter("password")
-            .defaultSuccessUrl("/kampanie",true).failureUrl("/login?error=true").permitAll();
+            .defaultSuccessUrl("/kampanie",true).failureUrl("/zaloguj?error=true").permitAll();
         });
         // Wylogowanie
         http.logout(customizer -> {
-            customizer.logoutUrl("/wyloguj").invalidateHttpSession(true).logoutSuccessUrl("/login?logout").permitAll();
+            customizer.logoutUrl("/wyloguj").invalidateHttpSession(true).logoutSuccessUrl("/zaloguj?wyloguj").permitAll();
+        });
+
+                // Sesje
+        http.sessionManagement((sessions) -> {
+            sessions.sessionConcurrency((session) -> {
+                session.maximumSessions(1).expiredUrl("/zaloguj?wyloguj");
+            }).sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
         });
 
         http.headers(Customizer.withDefaults());
