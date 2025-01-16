@@ -26,7 +26,6 @@ services:
   fishmail:
     container_name: fishmail
     image: fishmail-ssl:latest
-    restart: always
     expose:
       - ${SPRING_PORT_EXPOSE}
     environment:
