@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.management.RuntimeErrorException;
 import javax.swing.text.html.parser.Entity;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,6 +89,7 @@ public class AdminService {
         String activationLink = UUID.randomUUID().toString();
         registrationLink.setActivationCode(activationLink);
         registrationLink.setExpirationDate(LocalDateTime.now().plusHours(12));
+        registrationLink.setValid(true);
         registrationLink.setAccount(accountToCreate);
         accountToCreate.setAccountRegistrationLinks(registrationLink);
         adminEmailService.sendRegisterEmail(registrationLink);
@@ -95,8 +97,10 @@ public class AdminService {
     }
 
     // Usuń konto
-    public void deleteAccount(AccountModel accountModel){
-        accountRepository.delete(accountModel);
+    public void adminDeleteAccount(String accountEmail){
+        AccountModel accountToDelete = accountRepository.findOneByEmail(accountEmail).orElseThrow(() -> new RuntimeException("Nie znaleziono konta"));
+
+        accountRepository.delete(accountToDelete);
     }
     
     // Aktywuj konto poprzez link aktywacyjny
@@ -104,19 +108,23 @@ public class AdminService {
         System.out.println("Wywołano funkcję activate account");
         LocalDateTime now = LocalDateTime.now();
         AccountRegistrationLinks linkAccount = accountRegistrationLinksRepository.findOneByActivationCode(activationLink);
-
+  
         System.out.println(linkAccount.getAccount().getEmail());
         System.out.println(linkAccount.getActivationCode());
         // if(linkAccount.getExpirationDate().isBefore(now)){
-                if(now.isBefore(linkAccount.getExpirationDate())){
+        if(now.isBefore(linkAccount.getExpirationDate()) && linkAccount.isValid() && linkAccount != null){
 
             System.out.println("Warunek czasu sprawdzony");
             // AccountModel accountToActivate = accountRepository.findOneByAccountRegistrationLinks(linkAccount).orElseThrow(() -> new RuntimeException("Nie znaleziono konta po linku aktywacyjnym!"));
             AccountModel accountToActivate = linkAccount.getAccount();
             System.out.println(accountToActivate.getEmail());
             accountToActivate.setEnabled(true);
+            linkAccount.setValid(false);
             accountRepository.save(accountToActivate);
+    
 
+        } else {
+            System.out.println("Link nie istnieje");
         }
     }
 @Transactional
@@ -131,6 +139,7 @@ public void reSendActivationLink(String accountEmail) {
         // Zaktualizuj istniejący link, jeśli istnieje
         String activationCode = UUID.randomUUID().toString();
         oldLinkToDelete.setActivationCode(activationCode);
+        oldLinkToDelete.setValid(true);
         oldLinkToDelete.setExpirationDate(LocalDateTime.now().plusHours(12));
         accountRegistrationLinksRepository.save(oldLinkToDelete); // Zapisz zaktualizowany link
         return;
@@ -141,6 +150,7 @@ public void reSendActivationLink(String accountEmail) {
     String activationCode = UUID.randomUUID().toString();
     newLink.setActivationCode(activationCode);
     newLink.setExpirationDate(LocalDateTime.now().plusHours(12));
+    newLink.setValid(true);
     newLink.setAccount(accountToResend);
 
     // Zapisz nowy link
@@ -155,10 +165,35 @@ public void reSendActivationLink(String accountEmail) {
     // Ustaw hasło dla konta
     public void setUserPassword(String activationId,String userPassword){
         AccountRegistrationLinks registrationLink = accountRegistrationLinksRepository.findOneByActivationCode(activationId);
+
+        if(registrationLink.isValid()){
         AccountModel userAccountPasswordToChange = registrationLink.getAccount();
-
         userAccountPasswordToChange.setPassword(passwordEncoder.encode(userPassword));
+        registrationLink.setValid(false);
+        accountRegistrationLinksRepository.save(registrationLink);
         accountRepository.save(userAccountPasswordToChange);
+        } else {
+            throw new RuntimeException("Link aktywacyjny jest nie ważny!");
+        }
 
+
+    }
+
+
+    // Przedłuż działanie konta
+    public void redeemUserAccountValidity(String accountEmail){
+        System.out.println("Wywołano redeem");
+        AccountModel accountToRedeem = accountRepository.findOneByEmail(accountEmail).orElseThrow(() -> new RuntimeException("Nie znaleziono konta"));
+        accountToRedeem.setValidAccountTime(accountToRedeem.getValidAccountTime().plusDays(30));
+        accountRepository.save(accountToRedeem);
+    }
+
+    // Zablokuj konto
+    @Transactional
+    public void blockUserAccount(String accountEmail ){
+        System.out.println("Wywołano block user");
+        AccountModel accountToBlock = accountRepository.findOneByEmail(accountEmail).orElseThrow(() -> new RuntimeException("Nie znaleziono konta"));
+        accountToBlock.setBlocked(true);
+        accountRepository.save(accountToBlock);
     }
 }

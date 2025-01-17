@@ -14,11 +14,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.fishmail.Models.AccountModel;
+import com.example.fishmail.Models.AccountRegistrationLinks;
 import com.example.fishmail.Models.AdminEmail;
 import com.example.fishmail.Models.Enum.CampaingStatus;
 import com.example.fishmail.Repository.AccountRegistrationLinksRepository;
 import com.example.fishmail.Repository.AccountRepository;
 import com.example.fishmail.Repository.CampaingRepository;
+import com.example.fishmail.Service.AccountRegistrationLinkService;
 import com.example.fishmail.Service.AccountService;
 import com.example.fishmail.Service.Admin.AdminEmailService;
 import com.example.fishmail.Service.Admin.AdminService;
@@ -45,6 +47,12 @@ public class AdminController {
 
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    private AccountRegistrationLinkService accountRegistrationLinkService;
+
+    @Autowired
+    private AccountRegistrationLinksRepository accountRegistrationLinksRepository;
 
 
     // Wyświetl dashboard admina
@@ -105,7 +113,7 @@ public class AdminController {
             long campaingCountInProgress = campaingRepository.countByAccountAndStatus(userProfile, CampaingStatus.W_TRAKCIE);
             long campaingCountDone = campaingRepository.countByAccountAndStatus(userProfile, CampaingStatus.ZAKOŃCZONA);
             model.addAttribute("accountPrevCampaingInProgess", campaingCountInProgress);
-                
+            model.addAttribute("redeemUrl", "/admin/fishmail/konto-przedluz/" + userProfile.getId());
             model.addAttribute("accountPrevCampaingDone", campaingCountDone);
             model.addAttribute("userProfile", userProfile);
             model.addAttribute("loggedUser", adminPrincipal);
@@ -115,6 +123,51 @@ public class AdminController {
         }
 
     }
+
+    // Procesuj przedłużenie ważności konta
+    @PostMapping("/admin/fishmail/konto-przedluz/{id}")
+    public String redeemAccountValidityTime(@PathVariable String id, HttpServletRequest request, Model model) {
+        Principal adminPrincipal = request.getUserPrincipal();
+        AccountModel adminAccount = adminService.findOneByAccountAuthority("ROLE_ADMIN");
+        if(adminPrincipal.getName().equals(adminAccount.getEmail())){
+            AccountModel userProfile = adminService.findOneById(id);
+            System.out.println(userProfile.getEmail());
+            adminService.redeemUserAccountValidity(userProfile.getEmail());
+            return "redirect:/admin/fishmail/konto/" + id;
+        } else {
+            return "unauthorized";
+        }
+    }
+
+    // Procesuj zablokowanie konta użytkownika
+    @PostMapping("/admin/fishmail/konto-zablokuj/{id}")
+    public String blockAccountByAdmin(@PathVariable String id,HttpServletRequest request, Model model) {
+        Principal adminPrincipal = request.getUserPrincipal();
+        AccountModel adminAccount = adminService.findOneByAccountAuthority("ROLE_ADMIN");
+        if(adminPrincipal.getName().equals(adminAccount.getEmail())){
+            AccountModel userProfile = adminService.findOneById(id);
+            adminService.blockUserAccount(userProfile.getEmail());
+            return "redirect:/admin/fishmail/konto/" + id;
+        } else {
+            return "unauthorized";
+        }
+    }
+    
+    // Procesuj usunięcie konta użytkownika
+    @PostMapping("/admin/fishmail/konto-usun/{id}")
+    public String postMethodName(@PathVariable String id,HttpServletRequest request, Model model) {
+        Principal adminPrincipal = request.getUserPrincipal();
+        AccountModel adminAccount = adminService.findOneByAccountAuthority("ROLE_ADMIN");
+        if(adminPrincipal.getName().equals(adminAccount.getEmail())){
+            String userProfile = adminService.findOneById(id).getEmail();
+            adminService.adminDeleteAccount(userProfile);
+            return "redirect:/admin/fishmail";
+        } else {
+            return "unauthorized";
+        }
+    }
+    
+    
     
     // Wyświetl formularz do edycji konta
     @GetMapping("/admin/fishmail/edytuj-konto/{id}")
@@ -156,21 +209,21 @@ public class AdminController {
     }
     
 
-    // Procesowanie usunięcia konkretnego konta
-    @GetMapping("/admin/fishmail/usun-konto/{id}")
-    public String deleteAdminUserProfile(@PathVariable String id, HttpServletRequest request,Model model) {
-        Principal adminPrincipal = request.getUserPrincipal();
-        AccountModel adminAccount = adminService.findOneByAccountAuthority("ROLE_ADMIN");
-        if(adminPrincipal.getName().equals(adminAccount.getEmail())){
-            AccountModel accountToDelete = adminService.findOneById(id);
-            adminService.deleteAccount(accountToDelete);
+    // // Procesowanie usunięcia konkretnego konta
+    // @GetMapping("/admin/fishmail/usun-konto/{id}")
+    // public String deleteAdminUserProfile(@PathVariable String id, HttpServletRequest request,Model model) {
+    //     Principal adminPrincipal = request.getUserPrincipal();
+    //     AccountModel adminAccount = adminService.findOneByAccountAuthority("ROLE_ADMIN");
+    //     if(adminPrincipal.getName().equals(adminAccount.getEmail())){
+    //         AccountModel accountToDelete = adminService.findOneById(id);
+    //         adminService.deleteAccount(accountToDelete);
 
-            model.addAttribute("loggedUser", adminPrincipal);
-            return "redirect:/admin/fishmail";
-        } else {
-            return "unauthorized";
-        }
-    }
+    //         model.addAttribute("loggedUser", adminPrincipal);
+    //         return "redirect:/admin/fishmail";
+    //     } else {
+    //         return "unauthorized";
+    //     }
+    // }
     
     
     // Wyświetl stronę do emailowania do wszystkich użytkowników fishmail
@@ -217,12 +270,25 @@ public class AdminController {
     // Procesuj aktywacje konta
     @PostMapping("/aktywuj/{activationId}")
     public String processActivationService(@PathVariable String activationId) {
-      adminService.activateAccount(activationId);
-        return "redirect:/aktywuj-konto/ustaw-haslo?activationId=" + activationId;
+        
+             adminService.activateAccount(activationId);
+ 
+
+
+           return "redirect:/aktywuj-konto/ustaw-haslo?activationId=" + activationId;
     }
     
 
+    // Wyświetl stronę dla wygasłego linku aktywacyjnego
+    @GetMapping("/link-aktywacyjny-wygasl")
+    public String getActivationLinkDeadPage(HttpServletRequest request, Model model) {
+        Principal userPrincipal = request.getUserPrincipal();
 
+        model.addAttribute("loggedUser", userPrincipal);
+        
+        return "user-profile-activate-dead";
+    }
+    
     
     
    // Wyświetl stronę która po aktywacji konta przyjmie hasło podane przez użytkownika

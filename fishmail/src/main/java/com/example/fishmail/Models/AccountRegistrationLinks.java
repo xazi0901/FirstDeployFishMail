@@ -31,6 +31,9 @@ public class AccountRegistrationLinks {
 
     private LocalDateTime expirationDate;
 
+
+    private boolean isValid;
+
     @OneToOne
     @JoinColumn(name = "account_id",nullable = false, unique = true)
     private AccountModel account;

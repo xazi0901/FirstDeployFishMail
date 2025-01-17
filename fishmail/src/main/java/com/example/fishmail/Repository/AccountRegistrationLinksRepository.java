@@ -9,4 +9,6 @@ import com.example.fishmail.Models.AccountRegistrationLinks;
 public interface AccountRegistrationLinksRepository extends JpaRepository<AccountRegistrationLinks,Long> {
     
     AccountRegistrationLinks findOneByActivationCode(String activationCode);
+
+    // AccountRegistrationLinks findOneByActivationCodeThatIsValid (String activationCode);
 }

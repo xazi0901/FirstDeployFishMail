@@ -37,6 +37,9 @@
                     >
                       Status kampanii
                     </p>
+
+                  <div class="d-flex justify-content-between col-12 align-items-center mt-2">
+                    <div>
                     <p>
                       <a
                         th:href="@{'/kampania/odbiorcy/' + ${campaingToShow.id}}"
@@ -45,12 +48,35 @@
                         <span class="">Zobacz odbiorców</span>
                       </a>
                     </p>
-                    <a
-                      th:href="@{'/kampania/edytuj/' + ${campaingToShow.id}}"
-                      class="table-link text-warning"
-                    >
-                      <span class="">Edytuj kampanie</span>
-                    </a>
+                  </div>
+                  <div>
+                    <a th:href="@{'/kampania/dodaj-email/' + ${campaingToShow.id}}" class="btn btn-primary">Dodaj wiadomość</a>
+                  </div>
+                  </div>
+                  </div>
+                  <div
+                    class="d-flex justify-content-between col-12 align-items-center mt-2"
+                  >
+                    <div>
+                      <form
+                        th:action="@{'/kampania/usun/' + ${campaingToShow.id}}"
+                        method="POST"
+                      >
+                        <button class="btn btn-danger" type="submit">
+                          Usuń Kampanie
+                        </button>
+                      </form>
+                    </div>
+                    <div>
+                      <a
+                        th:href="@{'/kampania/edytuj/' + ${campaingToShow.id}}"
+                        class="btn btn-primary"
+                      >
+                        <span class="" style="color: white"
+                          >Edytuj kampanie</span
+                        >
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -147,17 +173,37 @@
                         >
                           Czas wysłania wiadomości
                         </td>
-                        <td style="width: 20%">
+                        <td>
+                          <div class="d-flex justify-content-center">
+                          <div>
+                          <a
+                            th:href="@{'/kampania/ksiega-korespondencji/' + ${email.id}}"
+                            class="table-link text-warning"
+                          >
+                            <span class="">Zobacz Statystyki</span>
+                          </a>
+                        </div>
+                        <div>
                           <a
                             th:href="@{'/kampania/email/' + ${email.id}}"
                             class="table-link text-warning"
                           >
-                            <span class="">Zobacz szczegóły</span>
+                            <span class="">Edytuj wiadomość</span>
                           </a>
+                        </div>
+                        <div>
+                          <form th:action="@{'/kampania/usun/email/' + ${email.id}}" method="POST">
+                            <input type="hidden" th:value="${campaingToShow.id}" name="campaingId" id="campaingId" />
+                            <button type="submit" class="btn btn-danger">Usuń wiadomość</button>
+                          </form>
+                        </div>
                         </td>
                       </tr>
                     </tbody>
                   </table>
+                                              
+
+  
                 </div>
               </div>
             </div>

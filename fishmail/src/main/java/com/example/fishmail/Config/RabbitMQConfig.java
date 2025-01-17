@@ -23,7 +23,6 @@ public class RabbitMQConfig {
     public Jackson2ObjectMapperBuilderCustomizer jacksonCustomizer() {
     return builder -> builder.timeZone(TimeZone.getTimeZone("Europe/Warsaw"));
     }
-
     // Bean do zdefiniowania message convertera!
     @Bean
     public Jackson2JsonMessageConverter messageConverter() {

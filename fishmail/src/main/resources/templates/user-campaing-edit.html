@@ -10,12 +10,12 @@
     <div th:replace="~{fragments/navbar.html :: nav_base}"></div>
     <div class="container">
     <form
-      th:action="@{/zapisz-kampanie}"
+      th:action="@{'/kampania/edytuj-kampanie/' + ${campaingToShow.id}}"
       method="POST"
-      th:object="${campaingModel}"
+      th:object="${campaingToShow}"
       enctype="multipart/form-data"
     >
-    <h1>Utwórz kampanie</h1>
+    <h1>Edytuj kampanie</h1>
     <div class="d-flex flex-wrap justify-content-between main-body" style="gap:20px;">
       <div class="d-flex flex-column card" style="flex:1 1 0">
       <div class="card-body">
@@ -25,7 +25,7 @@
             <label for="name" >Nazwa kampanii</label>
           </div>
           <div class="col-sm-9 text-secondary">
-              <input type="text" th:field="*{name}" id="name" />
+              <input type="text" th:field="*{name}" id="name" th:value="${campaingToShow.name}" />
           </div>
         </div>
         <hr />
@@ -62,21 +62,22 @@
       </div>
       <div class="d-flex flex-column card" style="flex:1 1 0">
         <div class="card-body" id="emailDiv">
+        <div th:each="email : ${campaingToShow.emails}">
         <div class="row justify-content-around">
           <div class="col-sm-3">
-            <label for="emails[0].title">Temat Emaila</label>
+            <label for="email.title">Temat Emaila</label>
           </div>
           <div class="col-sm-9 text-secondary">
-            <input type="text" name="emails[0].title" value="Email Title 1" />
+            <input type="text" name="email.title" th:value="${email.title}" />
           </div>
         </div>
         <hr/>
         <div class="row justify-content-around">
           <div class="col-sm-12">
-            <label for="emails[0].messageBody">Treść Wiadomości</label>
+            <label for="email.messageBody">Treść Wiadomości</label>
           </div>
           <div class="col-sm-12 text-secondary">
-            <textarea name="emails[0].messageBody" id="body" style="width: 100%;height:450px">Email Body 1</textarea>
+            <textarea name="email.messageBody" id="body" style="width: 100%;height:450px" th:value="${email.messageBody}">Email Body 1</textarea>
             <script>
             tinymce.init({
               selector: "#body",
@@ -107,7 +108,7 @@
             </div>
           </div>
         </div>
-
+</div>
         </div>
                 <button class="btn btn-primary" type="button" id="addEmailButton">Dodaj wiadomość</button>
         <hr/>

@@ -25,6 +25,7 @@ import com.example.fishmail.Models.OutgoingBook;
 import com.example.fishmail.Models.RecieversModel;
 import com.example.fishmail.Models.Enum.EmailStatus;
 import com.example.fishmail.Models.Enum.SendingStatus;
+import com.example.fishmail.Repository.CampaingRepository;
 import com.example.fishmail.Repository.EmailRepository;
 import com.example.fishmail.Repository.OutgoingBookRepository;
 import com.example.fishmail.Service.AccountService;
@@ -68,6 +69,9 @@ public class CampaingController {
 
     @Autowired
     private AccountService accountService;
+
+    @Autowired
+    private CampaingRepository campaingRepository;
 
     @GetMapping("/kampanie")
     public String getCampaingHome(HttpServletRequest request,Model model) {
@@ -227,14 +231,14 @@ public class CampaingController {
 
     // Procesowanie edycji zmiany danych kampanii
     @PostMapping("/kampania/edytuj-kampanie/{id}")
-    public String postMethodName(@PathVariable String id,@ModelAttribute CampaignModel campaingDataToEdit, HttpServletRequest request,Model model) {
+    public String postMethodName(@PathVariable String id,@ModelAttribute CampaignModel campaingToShow, HttpServletRequest request,Model model) {
         Principal userPrincipal = request.getUserPrincipal();
         CampaignModel campaingToEdit = campaingService.findOneById(id).orElseThrow(() -> new RuntimeException("Nie znaleziono kampanii"));
         if(userPrincipal.getName().equals(campaingToEdit.getAccount().getEmail())){
-            campaingToEdit.setEmails(campaingDataToEdit.getEmails());
-            campaingToEdit.setName(campaingDataToEdit.getName());
-            campaingToEdit.setRecivers(campaingDataToEdit.getRecivers());
-            return "redirect:/kampania";
+            campaingToEdit.setEmails(campaingToShow.getEmails());
+            campaingToEdit.setName(campaingToShow.getName());
+            campaingToEdit.setRecivers(campaingToShow.getRecivers());
+            return "redirect:/kampanie";
         } else {
             return "unauthorized";
         }
@@ -242,7 +246,7 @@ public class CampaingController {
     
 
     // Wyświetl książkę wychodzącą dla konkretnego emaila
-    @GetMapping("/kampania/email/{id}")
+    @GetMapping("/kampania/ksiega-korespondencji/{id}")
     public String getUserCampaingOutgoingBook(@PathVariable String id,HttpServletRequest request,Model model) {
         List<OutgoingBook> outgoingBookList = outgoingBookService.getAllOutgoingBooksForEmailCampaing(id);
         Principal userPrincipal = request.getUserPrincipal();
@@ -320,36 +324,71 @@ public class CampaingController {
     }
 
 
-    // Dodaj emaile do kampanii
-    @PostMapping("/kampania/dodaj-email/{id}")
-    public String addEmailToCampaing(@PathVariable String campaingId,@ModelAttribute EmailModel emailModel, HttpServletRequest request,Model model) {
-       Principal userPrincipal = request.getUserPrincipal();
-       CampaignModel campaingToAdd = campaingService.findOneById(campaingId).orElseThrow(() -> new RuntimeException("Nie znaleziono kampanii!"));
-       if(userPrincipal.getName().equals(campaingToAdd.getAccount().getEmail())){
-       List<EmailModel> listOfEmailsToAdd = campaingToAdd.getEmails();
-       listOfEmailsToAdd.add(emailModel);
-          return "redirect:/kampanie";
-       } else {
-        return "unathorized";
-       }
+    // // Dodaj emaile do kampanii
+    // @PostMapping("/kampania/dodaj-email/{id}")
+    // public String addEmailToCampaing(@PathVariable String id,@ModelAttribute EmailModel emailModel, HttpServletRequest request,Model model) {
+    //    Principal userPrincipal = request.getUserPrincipal();
+    //    CampaignModel campaingToAdd = campaingService.findOneById(id).orElseThrow(() -> new RuntimeException("Nie znaleziono kampanii!"));
+    //    if(userPrincipal.getName().equals(campaingToAdd.getAccount().getEmail())){
+    //    List<EmailModel> listOfEmailsToAdd = campaingToAdd.getEmails();
+    //    listOfEmailsToAdd.add(emailModel);
+    //       return "redirect:/kampanie";
+    //    } else {
+    //     return "unathorized";
+    //    }
      
-    }
+    // }
+    
+    // // Wyświetl dany email z kampanii
+    // @GetMapping("/kampania/email/{id}")
+    // public String getEmailInCampaing(@PathVariable String id, HttpServletRequest request, Model model) {
+    //     Principal userPrincipal = request.getUserPrincipal();
+    //     EmailModel emailToShow = emailRepository.findById(Long.valueOf(id)).orElseThrow(() -> new RuntimeException("Nie znaleziono wiadomości email"));
+    //     model.addAttribute("loggedUser", userPrincipal);
+    //     model.addAttribute("emailToShow", emailToShow);
+
+    //     return "user-campaing-email";
+
+    // }
+
+    // // Procesuj edycje pojedyńczego maila z kampanii
+    // @PostMapping("/kampania/email-edytuj/{id}")
+    // public String changeEmailInCapaing(@PathVariable String id,@ModelAttribute EmailModel emailModel, HttpServletRequest request, Model model) {
+    //     Principal usePrincipal = request.getUserPrincipal();
+    //     EmailModel emailToChange = emailRepository.findById(Long.valueOf(id)).orElseThrow(() -> new RuntimeException("Nie znaleziono wiadomości email"));
+    //     emailToChange.setTitle(emailModel.getTitle());
+    //     emailToChange.setMessageBody(emailModel.getMessageBody());
+    //     emailToChange.setSendDate(emailModel.getSendDate());
+    //     emailToChange.setSendTime(emailModel.getSendTime());
+    //     model.addAttribute("loggedUser", usePrincipal);
+    //     return "redirect:/kampanie";
+    // }
     
 
-    // Usuń emaile z kampanii
-    @PostMapping("/kampania/usun/email/{id}")
-    public String postMethodName(@PathVariable String id,@PathVariable String campaingId,HttpServletRequest request,Model model) {
-        Principal userPrincipal = request.getUserPrincipal();
-        CampaignModel campaingEmailsToRemove = campaingService.findOneById(campaingId).orElseThrow(() -> new RuntimeException("Nie znaleziono kampanii"));
-        if(userPrincipal.getName().equals(campaingEmailsToRemove.getAccount().getEmail())){
-            List<EmailModel> listOfEmailsFromCampaing = campaingEmailsToRemove.getEmails();
-            EmailModel emailToDelete = listOfEmailsFromCampaing.get(Integer.parseInt(id));
-            listOfEmailsFromCampaing.remove(emailToDelete.getId());
-            return "redirect:/kampanie";
-        } else {
-            return "unauthorized";
-        }
-    }
+
+    
+
+    // // Usuń konkretnego emaila z kampanii
+    // @PostMapping("/kampania/usun/email/{id}")
+    // public String postMethodName(@PathVariable String id,@RequestParam(name="campaingId") String campaingId,HttpServletRequest request,Model model) {
+    //     Principal userPrincipal = request.getUserPrincipal();
+    //     CampaignModel campaingEmailsToRemove = campaingService.findOneById(campaingId).orElseThrow(() -> new RuntimeException("Nie znaleziono kampanii"));
+    //     if(userPrincipal.getName().equals(campaingEmailsToRemove.getAccount().getEmail())){
+    //         // List<EmailModel> listOfEmailsFromCampaing = campaingEmailsToRemove.getEmails();
+    //         // EmailModel emailToDelete = listOfEmailsFromCampaing.get(Integer.parseInt(id));
+    //         // listOfEmailsFromCampaing.remove(emailToDelete.getId());
+    //         EmailModel emailToDelete = emailRepository.findById(Long.valueOf(id)).orElseThrow(() -> new RuntimeException("Nie znaleziono danego maila"));
+    //         List<OutgoingBook> listOutgoingByEmail = outgoingBookService.getAllOutgoingBookWithCampaing(emailToDelete);
+    //         for(OutgoingBook outgoingToDelete : listOutgoingByEmail){
+    //             outgoingBookRepository.delete(outgoingToDelete);
+    //         }
+    //         emailRepository.delete(emailToDelete);
+    //         campaingRepository.save(campaingEmailsToRemove);
+    //         return "redirect:/kampanie";
+    //     } else {
+    //         return "unauthorized";
+    //     }
+    // }
     
     
     

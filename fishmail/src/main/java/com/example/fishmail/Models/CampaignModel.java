@@ -46,8 +46,8 @@ public class CampaignModel {
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecieversModel> recivers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL)
-    private List<EmailModel> emails;
+    @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<EmailModel> emails = new ArrayList<>();
 
     // @OneToMany
     // private Set<SendingModel> sending;

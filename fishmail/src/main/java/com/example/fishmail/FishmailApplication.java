@@ -13,7 +13,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class FishmailApplication {
 
 	public static void main(String[] args) {
-		 TimeZone.setDefault(TimeZone.getTimeZone("Europe/Warsaw"));
+		TimeZone.setDefault(TimeZone.getTimeZone("Europe/Warsaw"));
 		SpringApplication.run(FishmailApplication.class, args);
 	}
 

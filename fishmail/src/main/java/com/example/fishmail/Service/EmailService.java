@@ -39,5 +39,7 @@ public class EmailService {
     public void deleteEmailInCapmaingById(Long id){
         emailRepository.deleteById(id);
     }
+
+    
     
 }

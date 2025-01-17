@@ -103,15 +103,6 @@
                 <hr />
                 <div class="row">
                   <div class="col-sm-3">
-                    <h6 class="mb-0">Hasło do konta</h6>
-                  </div>
-                  <div class="col-sm-9 text-secondary">
-                    <p th:text="${userProfile.password}">Hasło do Profilu</p>
-                  </div>
-                </div>
-                <hr />
-                <div class="row">
-                  <div class="col-sm-3">
                     <h6 class="mb-0">Adres email</h6>
                   </div>
                   <div class="col-sm-9 text-secondary">
@@ -143,17 +134,6 @@
                 <hr />
                 <div class="row">
                   <div class="col-sm-3">
-                    <h6 class="mb-0">Hasło do serwera poczty wychodzącej</h6>
-                  </div>
-                  <div class="col-sm-9 text-secondary">
-                    <p th:text="${userProfile.smtpPassword}">
-                      Login serwera poczty wychodzącej
-                    </p>
-                  </div>
-                </div>
-                <hr />
-                <div class="row">
-                  <div class="col-sm-3">
                     <h6 class="mb-0">Port do serwera poczty wychodzącej</h6>
                   </div>
                   <div class="col-sm-9 text-secondary">
@@ -164,15 +144,55 @@
                 </div>
                 <hr />
                 <div class="row">
-                  <div class="col-sm-12">
-                    <a
-                      class="btn btn-info"
-                      target="__blank"
-                      th:href="@{'/admin/fishmail/edytuj-konto/' + ${userProfile.id}"
-                      >Edytuj profil</a
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Przedłuż ważność konta</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    <form
+                      th:action="@{/admin/fishmail/konto-przedluz/{id}(id=${userProfile.id})}"
+                      method="POST"
+                      enctype="multipart/form-data"
                     >
+                      <button class="btn btn-primary" type="submit">
+                        Przedłuż o 30 dni
+                      </button>
+                    </form>
                   </div>
                 </div>
+                <hr />
+                <div class="row">
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Zablokuj konto użytkownika</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    <form
+                      th:action="@{/admin/fishmail/konto-zablokuj/{id}(id=${userProfile.id})}"
+                      method="POST"
+                      enctype="multipart/form-data"
+                    >
+                      <button class="btn btn-warning" type="submit">
+                        Zablokuj konto
+                      </button>
+                    </form>
+                  </div>
+                </div>
+                <hr />
+                <div class="row">
+                  <div class="col-sm-3">
+                    <h6 class="mb-0">Usuń konto użytkownika</h6>
+                  </div>
+                  <div class="col-sm-9 text-secondary">
+                    <form
+                      th:action="@{/admin/fishmail/konto-usun/{id}(id=${userProfile.id})}"
+                      method="POST"
+                    >
+                      <button class="btn btn-danger" type="submit">
+                        Usuń konto użytkownika
+                      </button>
+                    </form>
+                  </div>
+                </div>
+                <hr />
               </div>
             </div>
           </div>
