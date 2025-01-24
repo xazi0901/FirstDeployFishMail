@@ -1,6 +1,7 @@
 package com.example.fishmail.Controller;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -12,9 +13,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.example.fishmail.Models.RecieversModel;
+import com.example.fishmail.Repository.RecieversRepository;
 import com.example.fishmail.Service.OutgoingBookService;
 
 @Controller
@@ -23,6 +30,9 @@ public class EmailTrackingRestController {
  
     @Autowired
     private OutgoingBookService outgoingBookService;
+
+    @Autowired
+    private RecieversRepository recieversRepository;
 
 
     @GetMapping("/opened")
@@ -50,4 +60,7 @@ public class EmailTrackingRestController {
         // headers.setContentType(MediaType.IMAGE_JPEG);
         // return new ResponseEntity<>(pixel, headers, HttpStatus.OK);
     }
+
+
+
 }

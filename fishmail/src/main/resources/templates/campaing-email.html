@@ -4,16 +4,80 @@
   xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
   lang="pl"
 >
-  <head th:include="~{fragments/head.html :: headerfiles}"> </head>
+  <head th:insert="~{fragments/head.html :: headerfiles}"> </head>
 
   <body>
     <div th:replace="~{fragments/navbar.html :: nav_base}"></div>
     <h1>Statystyki szczegółowe wysłania Email</h1>
 
     <div class="container">
-      <div class="row">
+      <div
+        class="d-flex justify-content-between align-items-center"
+        style="margin-top: 20px"
+      >
+        <div class="col-3">
+          <canvas id="sendedChart"></canvas>
+          <div
+            class="d-flex align-items-center flex-column"
+            style="font-size: 12px"
+          >
+            <div class="d-flex" style="font-size: 12px">
+              <span th:text="${totalSended}"></span><span>/</span
+              ><span th:text="${totalMessages}"></span>
+            </div>
+          </div>
+        </div>
+        <div class="col-3">
+          <canvas id="openedChart"></canvas>
+          <div class="d-flex align-items-center" style="font-size: 12px">
+            <span th:text="${totalOpened}"></span>
+            <span>/</span><span th:text="${totalMessages}"></span>
+          </div>
+        </div>
+        <div class="col-3">
+          <canvas id="errorChart"></canvas>
+          <div class="d-flex align-items-center" style="font-size: 12px">
+            <span th:text="${totalError}"></span>
+            <span>/</span><span th:text="${totalMessages}"></span>
+          </div>
+        </div>
+        <div class="col-3">
+          <canvas id="plannedChart"></canvas>
+          <div class="d-flex align-items-center" style="font-size: 12px">
+            <span th:text="${totalPlanned}"></span>
+            <span>/</span><span th:text="${totalMessages}"></span>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="d-flex justify-content-start align-items-start flex-column"
+        style="margin-top: 20px; border: 1px solid gray; margin-bottom: 50px"
+      >
+        <form
+          th:action="@{'/kampania/ksiega-korespondencji/' + ${emailId}}"
+          method="GET"
+          id="filterForm"
+          style="display: flex; gap: 20px"
+        >
+          <div class="d-flex select-div">
+            <select class="form-select" name="status" id="statusFilter">
+              <option value="">Wszystkie statusy</option>
+              <option value="ZAPLANOWANA">Zaplanowano</option>
+              <option value="W_TRAKCIE">W trakcie</option>
+              <option value="WYSŁANO">Wysłano</option>
+              <option value="BŁĄD">Błąd</option>
+            </select>
+          </div>
+          <div class="d-flex button-div">
+            <button type="submit" class="btn btn-primary">Filtruj</button>
+          </div>
+        </form>
         <div class="col-lg-12">
-          <div class="main-box no-header clearfix">
+          <div
+            class="main-box no-header clearfix"
+            style="height: 400px; overflow: scroll"
+          >
             <div class="main-box-body clearfix">
               <div class="table-responsive">
                 <table class="table user-list">
@@ -46,61 +110,176 @@
       </div>
     </div>
 
-    <script>
-      const formMail = document.getElementById("mailSend");
+    <script th:inline="javascript">
+      // Pobieranie danych Thymeleaf
+      const labels = /*[[${labelsJson}]]*/ [];
+      const dataValues = /*[[${valuesJson}]]*/ [];
 
-      let title = document.getElementById("title");
-      // Pobierz zawartość edytora TinyMCE
-      let body = document.getElementById("body");
-      let date = document.getElementById("sendDate");
-      let time = document.getElementById("sendTime");
-      const mailBody = {
-        title: title.value,
-        body: body.value,
-        sendDate: date.value,
-        sendTime: time.value,
-      };
+      const sendedLabels = /*[[${sendedLabels}]]*/ [];
+      const sendedValues = /*[[${sendedValues}]]*/ [];
 
-      formMail.addEventListener("submit", (e) => {
-        e.preventDefault();
-        console.log(mailBody);
-        fetch("/send-email", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+      const openedLabels = /*[[${openedLabels}]]*/ [];
+      const openedValues = /*[[${openedValues}]]*/ [];
+
+      const errorLabels = /*[[${errorLabels}]]*/ [];
+      const errorValues = /*[[${errorValues}]]*/ [];
+
+      const plannedLabels = /*[[${plannedLabels}]]*/ [];
+      const plannedValues = /*[[${plannedValues}]]*/ [];
+
+      // Tworzenie wykresu Chart.js
+      // Sprawdzenie poprawności danych
+
+      if (!Array.isArray(labels) || !Array.isArray(dataValues)) {
+        console.error("Błąd: labels lub dataValues nie są tablicami!");
+      } else {
+        console.log("Dane są poprawne");
+        console.log("Labels:", labels);
+        console.log("Data Values:", dataValues);
+
+        // Tworzenie wykresu
+        const ctxSended = document
+          .getElementById("sendedChart")
+          .getContext("2d");
+        const sendChart = new Chart(ctxSended, {
+          type: "doughnut",
+          data: {
+            labels: sendedLabels,
+            datasets: [
+              {
+                label: "Status wysyłki",
+                data: sendedValues,
+                backgroundColor: [
+                  "rgba(31, 220, 255, 0.8)",
+                  "rgba(212, 211, 212, 0.8)",
+                ],
+                borderColor: [
+                  "rgba(31, 220, 255, 0.8)",
+                  "rgba(212, 211, 212, 0.8)",
+                ],
+                borderWidth: 1,
+              },
+            ],
           },
-          body: JSON.stringify(mailBody),
-        })
-          .then((answer) => {})
-          .catch((err) => {
-            console.log(err);
-          });
-      });
-
-      const scheduleMail = document.getElementById("schedule");
-
-      let date1 = document.getElementById("sendDate1");
-      let time1 = document.getElementById("sendTime1");
-      const mailBody1 = {
-        sendDate1: date1.value,
-        sendTime1: time1.value,
-      };
-
-      scheduleMail.addEventListener("submit", (e) => {
-        e.preventDefault();
-        console.log(mailBody1);
-        fetch("/schedule", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: "top",
+              },
+            },
           },
-          body: JSON.stringify(mailBody1),
-        })
-          .then((answer) => {})
-          .catch((err) => {
-            console.log(err);
-          });
-      });
+          parsing: {
+            sort: false,
+          },
+        });
+
+        const ctxOpened = document
+          .getElementById("openedChart")
+          .getContext("2d");
+        const openedChart = new Chart(ctxOpened, {
+          type: "doughnut",
+          data: {
+            labels: openedLabels,
+            datasets: [
+              {
+                label: "Status otwarcia",
+                data: openedValues,
+                backgroundColor: [
+                  "rgba(7, 246, 7, 0.8)",
+                  "rgba(212, 211, 212, 0.8)",
+                ],
+                borderColor: [
+                  "rgba(7, 246, 7, 0.8)",
+                  "rgba(212, 211, 212, 0.8)",
+                ],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: "top",
+              },
+            },
+          },
+          parsing: {
+            sort: false,
+          },
+        });
+
+        const ctxError = document.getElementById("errorChart").getContext("2d");
+        const errorChart = new Chart(ctxError, {
+          type: "doughnut",
+          data: {
+            labels: errorLabels,
+            datasets: [
+              {
+                label: "Status błędów",
+                data: errorValues,
+                backgroundColor: [
+                  "rgba(255, 2, 7, 0.8)",
+                  "rgba(212, 211, 212, 0.8)",
+                ],
+                borderColor: [
+                  "rgba(255, 2, 7, 0.8)",
+                  "rgba(212, 211, 212, 0.8)",
+                ],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: "top",
+              },
+            },
+          },
+          parsing: {
+            sort: false,
+          },
+        });
+
+        const ctxPlanned = document
+          .getElementById("plannedChart")
+          .getContext("2d");
+        const plannedChart = new Chart(ctxPlanned, {
+          type: "doughnut",
+          data: {
+            labels: plannedLabels,
+            datasets: [
+              {
+                label: "Status zaplanowanych",
+                data: plannedValues,
+                backgroundColor: [
+                  "rgba(196, 64, 215, 0.8)",
+                  "rgba(212, 211, 212, 0.8)",
+                ],
+                borderColor: [
+                  "rgba(196, 64, 215, 0.8)",
+                  "rgba(212, 211, 212, 0.8)",
+                ],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: "top",
+              },
+            },
+          },
+          parsing: {
+            sort: false,
+          },
+        });
+      }
     </script>
   </body>
 </html>

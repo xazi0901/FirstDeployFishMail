@@ -3,6 +3,7 @@ package com.example.fishmail.Controller;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,6 +18,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.example.fishmail.Models.CampaignModel;
 import com.example.fishmail.Models.EmailModel;
 import com.example.fishmail.Models.OutgoingBook;
+import com.example.fishmail.Models.RecieversModel;
+import com.example.fishmail.Models.Enum.EmailStatus;
+import com.example.fishmail.Models.Enum.SendingStatus;
 import com.example.fishmail.Repository.CampaingRepository;
 import com.example.fishmail.Repository.EmailRepository;
 import com.example.fishmail.Repository.OutgoingBookRepository;
@@ -67,6 +71,7 @@ public class EmailController {
         return "user-campaing-email-add";
     }
     
+    // Dodaj maila do kmapanii
 @PostMapping("/kampania/zapisz-email/{id}")
 @Transactional
 public String addEmailToCampaign(
@@ -85,18 +90,40 @@ public String addEmailToCampaign(
         return "unauthorized";
     }
 
-    // Associate email with the campaign
-    emailModel.setCampaign(campaignToAdd);
+    // Debugowanie ID emaila
+    System.out.println("Email ID przed ustawieniem na null: " + emailModel.getId());
+    emailModel.setId(null);
+    System.out.println("Email ID po ustawieniu na null: " + emailModel.getId());
 
-    // Add the email to the campaign's email list
+    // Zapisz email w bazie danych
+    emailModel.setCampaign(campaignToAdd);
+    emailModel.setStatus(EmailStatus.W_TRAKCIE);
+    emailModel = emailRepository.save(emailModel); // Zapisanie i nadpisanie z ID
+
+    // Dodaj email do kampanii
     campaignToAdd.getEmails().add(emailModel);
 
-    // Save the campaign (cascade ensures email is saved)
+    // Utwórz wpisy w OutgoingBook dla odbiorców
+    List<RecieversModel> campaignRecievers = campaignToAdd.getRecivers();
+    for (RecieversModel reciever : campaignRecievers) {
+        OutgoingBook newOutgoingBook = new OutgoingBook();
+        String trackingId = UUID.randomUUID().toString();
+        newOutgoingBook.setEmail(emailModel); // emailModel już zapisany, ma ID
+        newOutgoingBook.setSendDate(emailModel.getSendDate());
+        newOutgoingBook.setSendTime(emailModel.getSendTime());
+        newOutgoingBook.setStatus(SendingStatus.ZAPLANOWANA);
+        newOutgoingBook.setRecivierEmail(reciever.getRecieverEmail());
+        newOutgoingBook.setTrackingId(trackingId);
+
+        // Zapisz wpis w OutgoingBook
+        outgoingBookRepository.save(newOutgoingBook);
+    }
+
+    // Zapisz kampanię
     campaingRepository.save(campaignToAdd);
 
     return "redirect:/kampania/" + id;
 }
-
 
 
     // Procesuj edycje pojedyńczego maila z kampanii
@@ -109,6 +136,8 @@ public String addEmailToCampaign(
         emailToChange.setMessageBody(emailModel.getMessageBody());
         emailToChange.setSendDate(emailModel.getSendDate());
         emailToChange.setSendTime(emailModel.getSendTime());
+        emailToChange.setStatus(EmailStatus.W_TRAKCIE);
+        emailRepository.save(emailToChange);
         model.addAttribute("loggedUser", usePrincipal);
         return "redirect:/kampania/" + campaingId;
     }

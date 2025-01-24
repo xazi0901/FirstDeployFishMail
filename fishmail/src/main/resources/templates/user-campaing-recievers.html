@@ -12,34 +12,196 @@
 
     <div class="container">
       <!-- TESTY Z DYNAMICZNYMI TABELAMI -->
-      <div style="border: 1px solid red">
-        <p>Nie używaj tego</p>
-        <div
-          th:replace="fragments/table.html :: dynamicTable(columns=${columns}, rows=${rows}, title='Twoje Kampanie')"
-        ></div>
-      </div>
       <!-- KONIEC TESTY Z DYNAMICZNYMI TABELAMI -->
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="main-box no-header clearfix">
-            <div class="main-box-body clearfix">
-              <div class="table-responsive">
-                <table class="table user-list">
-                  <thead>
-                    <tr>
-                      <th><span>Numer porządkowy</span></th>
-                      <th><span>Adres email</span></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr th:each="reciever : ${recieversList}">
-                      <td th:text="${reciever.id}">
-                        Numer porządkowy odbiorcy
-                      </td>
-                      <td th:text="${reciever.recieverEmail}">Adres email</td>
-                    </tr>
-                  </tbody>
-                </table>
+      <div
+        class="d-flex flex-wrap justify-content-between main-body"
+        style="gap: 15px"
+      >
+        <div class="d-flex flex-column card" style="flex: 1 1 0">
+          <div class="card-body">
+            <p>Edytuj całą listę odbiorców poprzez podanie nowej całej listy</p>
+            <form
+              th:action="@{'/kampania/zamien-odbiorcow/' +${campaingId}}"
+              method="POST"
+              enctype="multipart/form-data"
+            >
+              <div class="row justify-content-around">
+                <div class="col-sm-3">
+                  <label for="recipientsFile"
+                    >Importuj odbiorców z pliku Excel:</label
+                  >
+                </div>
+                <div class="col-sm-9 text-secondary">
+                  <input
+                    type="file"
+                    name="recipientsFile"
+                    id="recipientsFile"
+                    accept=".xlsx,.xls"
+                    class="btn btn-info"
+                  />
+                </div>
+              </div>
+              <hr />
+              <div class="row justify-content-around">
+                <div class="col-sm-12">
+                  <label for="recipientsInput"
+                    >Dodaj odbiorców (oddziel przecinkami):</label
+                  >
+                </div>
+                <div class="col-sm-12 text-secondary">
+                  <textarea
+                    name="recipientsInput"
+                    rows="4"
+                    cols="30"
+                    placeholder="email1@example.com,email2@example.com"
+                    style="width: 100%; height: 200px"
+                  ></textarea>
+                  <button type="submit" class="btn btn-primary">
+                    Edytuj wszystkich odbiorców
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="d-flex flex-column card" style="flex: 1 1 0">
+          <div class="card-body">
+            <p>Bądź edytuj aktualną listę którą już masz!</p>
+            <div
+              class="d-flex justify-content-between align-self-center align-items-center"
+              style="border: 1px solid red"
+            >
+              <p>Z tego na razie nie korzystamy!</p>
+              <form class="home_searching_form" id="massiveForm">
+                <div class="d-flex justify-content-between" style="gap: 30px">
+                  <div class="input-group mt-3 mb-3" style="">
+                    <select
+                      class="form-select"
+                      aria-label="Default select example"
+                      form="searchForm"
+                      name="size"
+                      onchange="changePageSize()"
+                      id="pageSize"
+                    >
+                      <option selected>Działania masowe:</option>
+                      <option>Usuń</option>
+                    </select>
+                  </div>
+                  <div
+                    class="d-flex align-self-center align-items-center home_searching_buttons mt-3 mb-3"
+                  >
+                    <button
+                      type="submit"
+                      class="btn btn-primary"
+                      id="massiveOperationsButton"
+                    >
+                      Zatwierdź
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="d-flex justify-content-end align-items-center mt-2">
+              <button type="button" class="btn btn-primary">
+                Dodaj odbiorcę do listy
+              </button>
+            </div>
+
+            <div
+              class="main-box no-header clearfix"
+              style="height: 400px; overflow: scroll"
+            >
+              <div class="main-box-body clearfix">
+                <div class="table-responsive">
+                  <table class="table user-list">
+                    <thead>
+                      <tr>
+                        <th><span>Wybierz odbiorcę</span></th>
+                        <th><span>Adres email</span></th>
+                        <th><span>Akcje</span></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr th:each="reciever : ${recieversList}">
+                        <td>
+                          <input
+                            type="checkbox"
+                            class="custom-control-input"
+                            id="recieverCheck"
+                            th:value="${reciever.id}"
+                          />
+                        </td>
+                        <td>
+                          <span
+                            th:text="${reciever.recieverEmail}"
+                            class="email-display"
+                          ></span>
+                          <input
+                            type="text"
+                            class="form-control email-input"
+                            th:value="${reciever.recieverEmail}"
+                            style="display: none"
+                          />
+                        </td>
+                        <td>
+                          <div
+                            class="d-flex justify-content-center"
+                            style="gap: 20px"
+                          >
+                            <div>
+                              <button
+                                class="btn btn-primary"
+                                id="editRecieverButton"
+                              >
+                                Edytuj odbiorcę
+                              </button>
+                              <form
+                                id="FormEditReciever"
+                                th:action="@{'/kampania/edytuj-odbiorce/' +${reciever.id}}"
+                                method="POST"
+                              >
+                                <input
+                                  type="hidden"
+                                  name="recieverEmail"
+                                  id="recieverEmail"
+                                />
+                                <input
+                                  type="hidden"
+                                  name="campaingId"
+                                  id="campaingId"
+                                  th:value="${campaingId}"
+                                />
+                                <button
+                                  class="btn btn-success save-btn"
+                                  type="submit"
+                                  style="display: none"
+                                >
+                                  Zapisz
+                                </button>
+                              </form>
+                            </div>
+                            <div>
+                              <form
+                                th:action="@{'/kampania/usun-odbiorce/' +${reciever.id}}"
+                                method="POST"
+                              >
+                                <input
+                                  type="hidden"
+                                  name="campaingId"
+                                  id="campaingId"
+                                  th:value="${campaingId}"
+                                />
+                                <button type="submit" class="btn btn-danger">
+                                  Usuń odbiorcę
+                                </button>
+                              </form>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
@@ -48,59 +210,67 @@
     </div>
 
     <script>
-      const formMail = document.getElementById("mailSend");
+      document.addEventListener("DOMContentLoaded", function () {
+        const editButtons = document.querySelectorAll("#editRecieverButton");
+        const saveButtons = document.querySelectorAll(".save-btn");
+        const recieverChecks = document.querySelectorAll("#recieverCheck");
+        const massiveButton = document.getElementById(
+          "massiveOperationsButton"
+        );
+        const massiveForm = document.getElementById("massiveForm");
+        let massiveIds = [];
 
-      let title = document.getElementById("title");
-      // Pobierz zawartość edytora TinyMCE
-      let body = document.getElementById("body");
-      let date = document.getElementById("sendDate");
-      let time = document.getElementById("sendTime");
-      const mailBody = {
-        title: title.value,
-        body: body.value,
-        sendDate: date.value,
-        sendTime: time.value,
-      };
+        editButtons.forEach((editButton) => {
+          editButton.addEventListener("click", () => {
+            const row = editButton.closest("tr");
+            const emailDisplay = row.querySelector(".email-display");
+            const emailInput = row.querySelector(".email-input");
+            const saveButton = row.querySelector(".save-btn");
 
-      formMail.addEventListener("submit", (e) => {
-        e.preventDefault();
-        console.log(mailBody);
-        fetch("/send-email", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(mailBody),
-        })
-          .then((answer) => {})
-          .catch((err) => {
-            console.log(err);
+            // Ukryj tekst emaila, pokaż pole input i przycisk "Zapisz"
+            emailDisplay.style.display = "none";
+            emailInput.style.display = "block";
+            saveButton.style.display = "inline-block";
+            editButton.style.display = "none";
           });
+        });
+
+        saveButtons.forEach((saveButton) => {
+          saveButton.addEventListener("click", () => {
+            const formE = saveButton.closest("form"); // Znalezienie formularza
+            const row = saveButton.closest("tr"); // Znalezienie wiersza
+            const emailInput = row.querySelector(".email-input"); // Input do edycji
+            const emailDisplay = row.querySelector(".email-display"); // Wyświetlacz emaila
+            const editButton = row.querySelector("#editRecieverButton"); // Przycisk edycji
+            const updatedEmail = emailInput.value; // Pobranie wartości z inputa
+
+            // Tworzenie ukrytego pola dla zaktualizowanego emaila
+            let inputValue = formE.querySelector("#recieverEmail"); // Sprawdzenie, czy pole już istnieje
+            if (!inputValue) {
+              inputValue = document.createElement("input");
+              inputValue.type = "hidden";
+              inputValue.name = "recieverEmail"; // Nazwa parametru
+              inputValue.id = "recieverEmail"; // Identyfikator
+              formE.appendChild(inputValue); // Dodanie ukrytego pola do formularza
+            }
+            inputValue.value = updatedEmail; // Aktualizacja wartości w ukrytym polu
+
+            // Przełączanie widoczności elementów
+            emailDisplay.style.display = "block";
+            emailDisplay.textContent = updatedEmail; // Aktualizacja wyświetlanego emaila
+            emailInput.style.display = "none";
+            saveButton.style.display = "none";
+            editButton.style.display = "inline-block";
+          });
+        });
       });
 
-      const scheduleMail = document.getElementById("schedule");
-
-      let date1 = document.getElementById("sendDate1");
-      let time1 = document.getElementById("sendTime1");
-      const mailBody1 = {
-        sendDate1: date1.value,
-        sendTime1: time1.value,
-      };
-
-      scheduleMail.addEventListener("submit", (e) => {
-        e.preventDefault();
-        console.log(mailBody1);
-        fetch("/schedule", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(mailBody1),
-        })
-          .then((answer) => {})
-          .catch((err) => {
-            console.log(err);
-          });
+      massiveButton.addEventListener("click", function () {
+        forEach((recieverCheck) => {
+          if (recieverCheck.selected == true) {
+            massiveIds.push(recieverCheck.value);
+          }
+        });
       });
     </script>
   </body>

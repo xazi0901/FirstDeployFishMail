@@ -17,7 +17,7 @@ public class AdminEmailConfiguration {
 
         // Funkcja która pobiera dane użytkownika do SMTP
         public JavaMailSender getJavaMailSender(){
-        AccountModel accountFromSend = accountService.findByEmail("test@gmail.com").orElseThrow(() -> new RuntimeException("Nie znaleziono konta admina!"));
+        AccountModel accountFromSend = accountService.findByEmail("kkarpix9020@gmail.com").orElseThrow(() -> new RuntimeException("Nie znaleziono konta admina!"));
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost(accountFromSend.getSmtpHost());
         mailSender.setPort(accountFromSend.getSmtpPort());

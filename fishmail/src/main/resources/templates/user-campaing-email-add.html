@@ -15,7 +15,7 @@
       th:object="${emailToAdd}"
       enctype="multipart/form-data"
     >
-    <h1>Wiadomość Email</h1>
+    <h1>Dodaj wiadomość email do kampanii</h1>
     <div class="d-flex flex-wrap justify-content-between main-body" style="gap:20px;">
       <div class="d-flex flex-column card" style="flex:1 1 0">
       <div class="card-body">
@@ -28,7 +28,7 @@
             <label for="emailToAdd.title">Temat Emaila</label>
           </div>
           <div class="col-sm-9 text-secondary">
-            <input type="text" name="emailToAdd.title"  />
+            <input type="text" name="emailToAdd.title" th:field="*{title}"  />
           </div>
         </div>
         <hr/>
@@ -37,7 +37,7 @@
             <label for="emailToAdd.messageBody">Treść Wiadomości</label>
           </div>
           <div class="col-sm-12 text-secondary">
-            <textarea name="emailToAdd.messageBody" id="body" style="width: 100%;height:450px">Email Body 1</textarea>
+            <textarea name="emailToAdd.messageBody" id="body" style="width: 100%;height:450px" th:field="*{messageBody}">Email Body 1</textarea>
             <script>
             tinymce.init({
               selector: "#body",
@@ -60,18 +60,18 @@
           <div class="col-sm-4 text-secondary d-flex justify-content-start">
             <div class="d-flex">
             <label for="emailToShow.sendDate">Data:</label>
-            <input type="date" name="emailToAdd.sendDate"/>
+            <input type="date" name="emailToAdd.sendDate" th:field="*{sendDate}"/>
             </div>
             <div class="d-flex">
               <label for="emailToShow.sendTime">Czas:</label>
-            <input type="time" name="emailToAdd.sendTime" />
+            <input type="time" name="emailToAdd.sendTime" th:field="*{sendTime}"/>
             </div>
           </div>
         </div>
 
         </div>
         <hr/>
-          <button class="btn btn-primary" type="submit">Edytuj wiadomość</button>
+          <button class="btn btn-primary" type="submit">Dodaj wiadomość</button>
     </div>
     </div>
     </form>

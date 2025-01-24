@@ -102,13 +102,14 @@ public class UserProfileController {
         AccountModel userProfile = accountService.findByEmail(userPrincipal.getName()).orElseThrow(() -> new RuntimeException("Nie znaleziono konta!"));
 
         if(userPrincipal.getName().equals(userProfile.getEmail())){
-            userProfile.setSmtpHost(account.getSmtpHost());
-            userProfile.setSmtpLogin(account.getSmtpLogin());
-            userProfile.setSmtpPassword(account.getSmtpPassword());
-            userProfile.setSmtpPort(account.getSmtpPort());
-            userProfile.setFirstLogin(false);
+            // userProfile.setSmtpHost(account.getSmtpHost());
+            // userProfile.setSmtpLogin(account.getSmtpLogin());
+            // userProfile.setSmtpPassword(account.getSmtpPassword());
+            // userProfile.setSmtpPort(account.getSmtpPort());
+            // userProfile.setFirstLogin(false);
         
-            accountService.save(userProfile);
+            // accountService.save(userProfile);
+            accountService.saveAccountFirstLoginSmtpProfile(userProfile.getId(), account.getSmtpLogin(), account.getSmtpPassword(), account.getSmtpHost(), account.getSmtpPort());
             model.addAttribute("loggedUser", userPrincipal);
             return "redirect:/profil";
         } else {
@@ -116,5 +117,10 @@ public class UserProfileController {
         }
     }
     
+    
+    @GetMapping("/profil/zmien-haslo")
+    public String getUserPasswordChangeForm(@RequestParam String param) {
+        return "user-profile-password-change";
+    }
     
 }

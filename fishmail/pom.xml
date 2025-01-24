@@ -11,7 +11,7 @@
 	<groupId>com.example</groupId>
 	<artifactId>fishmail</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 	<name>fishmail</name>
 	<description>fishmail</description>
 	<url/>

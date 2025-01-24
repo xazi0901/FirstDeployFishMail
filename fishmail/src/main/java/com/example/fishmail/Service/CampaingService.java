@@ -50,7 +50,15 @@ public class CampaingService {
     // private EmailRepository emailRepository;
 
     public Optional<CampaignModel> findOneById(String id){
-        return campaingRepository.findById(Long.parseLong(id));
+            try {
+        // Sprawdzamy, czy id to rzeczywiście liczba
+        Long campaignId = Long.parseLong(id);
+        return campaingRepository.findById(campaignId);
+    } catch (NumberFormatException e) {
+        // Zwracamy pusty wynik lub logujemy błąd
+        System.err.println("Nieprawidłowy ID kampanii: " + id); // Można dodać logowanie
+        return Optional.empty(); // Możesz również rzucić wyjątek, jeśli preferujesz
+    }
     }
 
     public List<CampaignModel> getAllCampaings(){
@@ -104,4 +112,6 @@ public class CampaingService {
          campaingRepository.delete(campaingToDelete);
 
     }
+
+    // Zapisz kampanie po modyfikacji odbiorców
 }

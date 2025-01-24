@@ -119,7 +119,7 @@ public class AdminService {
             AccountModel accountToActivate = linkAccount.getAccount();
             System.out.println(accountToActivate.getEmail());
             accountToActivate.setEnabled(true);
-            linkAccount.setValid(false);
+            // linkAccount.setValid(false);
             accountRepository.save(accountToActivate);
     
 
@@ -168,6 +168,8 @@ public void reSendActivationLink(String accountEmail) {
 
         if(registrationLink.isValid()){
         AccountModel userAccountPasswordToChange = registrationLink.getAccount();
+        System.out.println(userAccountPasswordToChange.getEmail());
+        System.out.println(userPassword);
         userAccountPasswordToChange.setPassword(passwordEncoder.encode(userPassword));
         registrationLink.setValid(false);
         accountRegistrationLinksRepository.save(registrationLink);

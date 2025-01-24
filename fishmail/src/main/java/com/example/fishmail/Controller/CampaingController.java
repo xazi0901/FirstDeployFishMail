@@ -5,11 +5,14 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.hibernate.query.SortDirection;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +38,8 @@ import com.example.fishmail.Service.RecieverService;
 import com.example.fishmail.Service.Admin.AdminService;
 import com.example.fishmail.Service.DynamicDataService.DynamicDataService;
 import com.example.fishmail.Service.Excel.ExcelService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -161,10 +166,14 @@ public class CampaingController {
 
             int totalOutgoingBooks = outgoingBookRepository.findAllByEmail(emailOutgoing).size();
             double effectiveness = totalOutgoingBooks > 0 ? (outgoingOpenedCount * 100.0 / totalOutgoingBooks) : 0.0;
+            double outgoingInEndEffectivness = totalOutgoingBooks > 0 ? (outgoingBookStatusWyslano * 100 / totalOutgoingBooks) : 0.0;
+            double outgoingOpenedEffectivness = totalOutgoingBooks > 0 ? (outgoingOpenedCount * 100 / totalOutgoingBooks) : 0.0;
 
             stats.put("outgoingInEnd", outgoingBookStatusWyslano);
             stats.put("outgoingOpened", outgoingOpenedCount);
             stats.put("outgoingBookTotal", effectiveness);
+            stats.put("outgoingInEndEffectivness",outgoingInEndEffectivness);
+            stats.put("outgoingOpenedEffectivness",outgoingOpenedEffectivness);
 
             emailStatistics.put(emailOutgoing, stats);
         }
@@ -178,36 +187,6 @@ public class CampaingController {
             model.addAttribute("campaingInProgress", countEmailByStatusWTrakcie);
             model.addAttribute("campaingEnd", countEmailByStatusZakonczone);
             model.addAttribute("emailStatistics", emailStatistics);
-
-
-            // for(EmailModel emailOutgoing : emailToShow){
-            //     List<OutgoingBook> findAllByEmail = outgoingBookRepository.findAllByEmail(emailOutgoing);
-            //     int totalSizeOfOutgoingBook = findAllByEmail.size();
-            //     model.addAttribute("outgoingBookStatistics", findAllByEmail);
-            //     model.addAttribute("sizeOutgoingBook", totalSizeOfOutgoingBook);
-                
-            // }
-
-
-
-            // for(EmailModel emailOutgoing : emailToShow){
-            //     long outgoingBookByStatusWTrakcie = outgoingBookRepository.countByEmailAndStatus(emailOutgoing, SendingStatus.W_TRAKCIE);
-            //     long outgoingBookStatusWyslano = outgoingBookRepository.countByEmailAndStatus(emailOutgoing, SendingStatus.WYSŁANO);
-            //     List<OutgoingBook> outgoingBookOpened = outgoingBookRepository.findAllByIsOpened(true);
-            //     List<OutgoingBook> totalSizeOpeningBook = outgoingBookRepository.findAllByEmail(emailOutgoing);
-            //     double percentageOfEffectivenes = outgoingBookOpened.size() * 100 / totalSizeOpeningBook.size();
-            //     model.addAttribute("outgoingOpened", outgoingBookOpened);
-            //     model.addAttribute("outgoingInProgress", outgoingBookByStatusWTrakcie);
-            //     model.addAttribute("outgoingInEnd", outgoingBookStatusWyslano);
-            //     model.addAttribute("outgoingBookTotal", percentageOfEffectivenes);
-            // }
-            // for(EmailModel emailForOutgoingBook : emailToShow){
-            //     List<OutgoingBook> outgoingBooksByEmail = outgoingBookService.getAllOutgoingBookWithCampaing(emailForOutgoingBook);
-            //     model.addAttribute("outgoingBookByEmail", outgoingBooksByEmail);
-            // }
-            
-
-            
 
             return "user-campaing";
         } else {
@@ -246,14 +225,125 @@ public class CampaingController {
     
 
     // Wyświetl książkę wychodzącą dla konkretnego emaila
-    @GetMapping("/kampania/ksiega-korespondencji/{id}")
-    public String getUserCampaingOutgoingBook(@PathVariable String id,HttpServletRequest request,Model model) {
-        List<OutgoingBook> outgoingBookList = outgoingBookService.getAllOutgoingBooksForEmailCampaing(id);
+    // @GetMapping("/kampania/ksiega-korespondencji/{id}")
+    // public String getUserCampaingOutgoingBook(@PathVariable String id,HttpServletRequest request,Model model) {
+    //     List<OutgoingBook> outgoingBookList = outgoingBookService.getAllOutgoingBooksForEmailCampaing(id);
+    //     Principal userPrincipal = request.getUserPrincipal();
+    //     model.addAttribute("loggedUser", userPrincipal);
+    //     model.addAttribute("outgoingBooks", outgoingBookList);
+    //     return "campaing-email";
+    // }
+     @GetMapping("/kampania/ksiega-korespondencji/{id}")
+    public String getOutgoingBookByStatus(@PathVariable String id,@RequestParam(required = false,name = "status") String status, HttpServletRequest request, Model model) {
         Principal userPrincipal = request.getUserPrincipal();
+        List<OutgoingBook> outgoingBooks;
+
+        if (status != null && !status.isEmpty()) {
+            outgoingBooks = outgoingBookRepository.findByStatusAndEmailId(SendingStatus.valueOf(status),Long.valueOf(id));
+        } else {
+         outgoingBooks = outgoingBookService.getAllOutgoingBookWithCampaing(emailRepository.findById(Long.valueOf(id)).orElseThrow(() -> new RuntimeException("Nie znaleziono wiadomości")));
+        }
+    //    List<OutgoingBook> outgoingBooks = outgoingBookService.getAllOutgoingBooksForEmailCampaing(id);
+
+       Map<String,Double> sendedData = new LinkedHashMap<>();
+       Map<String,Double> openedData = new LinkedHashMap<>();
+       Map<String,Double> errorData = new LinkedHashMap<>();
+       Map<String,Double> plannedData = new LinkedHashMap<>();
+       Map<String,Double> totalStatistics = Map.of();
+       for(OutgoingBook emailForStatistics : outgoingBooks){
+            EmailModel emailToGet = emailForStatistics.getEmail();
+            int zaplanowanoMessages = (int)outgoingBookRepository.countByEmailAndStatus(emailToGet, SendingStatus.ZAPLANOWANA);
+            int wTrakcieMessages = (int)outgoingBookRepository.countByEmailAndStatus(emailToGet,SendingStatus.W_TRAKCIE);
+            int wyslanoMessages = (int)outgoingBookRepository.countByEmailAndStatus(emailToGet, SendingStatus.WYSŁANO);
+            int bladMessages = (int)outgoingBookRepository.countByEmailAndStatus(emailToGet, SendingStatus.BŁĄD);
+            int openedMessages = outgoingBookRepository.countOutgoingBooksByIsOpened(true).size();
+            int totalMessages = zaplanowanoMessages + wTrakcieMessages+wyslanoMessages+bladMessages+openedMessages;
+            sendedData.put("Suma Procentowa Wysłanych Wiadomości", (wyslanoMessages / (double) totalMessages) * 100);
+            sendedData.put("Suma wiadomości",(wyslanoMessages - (double) totalMessages) *100);
+            // sendedData = Map.of(
+            //     "Suma Procentowa Wysłanych Wiadomości",(wyslanoMessages / (double) totalMessages) * 100,
+            //     "Suma wiadomości",(wyslanoMessages - (double) totalMessages) *100
+            // );
+            openedData.put("Suma Procentowa Otwartych Wiadomości", (openedMessages / (double) totalMessages) * 100);
+            openedData.put("Suma wiadomości",(openedMessages - (double) totalMessages) * 100);
+            // openedData = Map.of(
+            //     "Suma Procentowa Otwartych Wiadomości", (openedMessages / (double) totalMessages) * 100,
+            //     "Suma wiadomości",(openedMessages - (double) totalMessages) * 100
+            // );
+            errorData.put("Suma Procentowa Błędów Wysłania Wiadomości", (bladMessages / (double) totalMessages) * 100);
+            errorData.put("Suma wiadomości",(bladMessages - (double) totalMessages) * 100);
+            // errorData = Map.of(
+            //     "Suma Procentowa Błędów Wysłania Wiadomości", (bladMessages / (double) totalMessages) * 100,
+            //     "Suma wiadomości",(bladMessages - (double) totalMessages) * 100
+            // );
+            plannedData.put("Suma Procentowa Zaplanowanych Wiadomości", (zaplanowanoMessages / (double) totalMessages) *100);
+            plannedData.put("Suma wiadomości",(zaplanowanoMessages - (double) totalMessages) * 100);
+            // plannedData = Map.of(
+            //     "Suma Procentowa Zaplanowanych Wiadomości", (zaplanowanoMessages / (double) totalMessages) *100,
+            //     "Suma wiadomości",(zaplanowanoMessages - (double) totalMessages) * 100
+            // );
+            totalStatistics = Map.of(
+    "Procent Sumy Wiadomości zaplanowanych", (zaplanowanoMessages / (double) totalMessages) * 100,
+    "Procent Sumy Wiadomości wysłanych", (wyslanoMessages / (double) totalMessages) * 100,
+    "Procent Sumy Wiadomości z błędem", (bladMessages / (double) totalMessages) * 100,
+    "Procent Sumy Wiadomości otwartych", (openedMessages / (double) totalMessages) * 100
+        );
+
+          model.addAttribute("totalSended", wyslanoMessages);
+          model.addAttribute("totalOpened", openedMessages);
+          model.addAttribute("totalError", bladMessages);
+          model.addAttribute("totalPlanned", zaplanowanoMessages);
+          model.addAttribute("totalMessages", totalMessages);
+
+       }
+        // if (status != null && !status.isEmpty()) {
+        //     outgoingBooks = outgoingBookRepository.findByStatus(SendingStatus.valueOf(status));
+        // } else {
+        //     outgoingBooks;
+        // }
+
+        List<String> sendedLabels = new ArrayList<>(sendedData.keySet());
+        List<Double> sendedValues = new ArrayList<>(sendedData.values());
+
+        List<String> openedLabels = new ArrayList<>(openedData.keySet());
+        List<Double> openedValues = new ArrayList<>(openedData.values());
+
+        List<String> errorLabels = new ArrayList<>(errorData.keySet());
+        List<Double> errorValues = new ArrayList<>(errorData.values());
+
+        List<String> plannedLabels = new ArrayList<>(plannedData.keySet());
+        List<Double> plannedValues = new ArrayList<>(plannedData.values());
+                // Konwertuj dane na JSON
+        // String labelsJson = objectMapper.writeValueAsString(data.keySet());
+       // Konwertuj keySet() i values() na listy
+        List<String> labelsJson = new ArrayList<>(totalStatistics.keySet());
+        List<Double> valuesJson = new ArrayList<>(totalStatistics.values());
+        // String valuesJson = objectMapper.writeValueAsString(data.values());
+        model.addAttribute("sendedLabels", sendedLabels);
+        model.addAttribute("sendedValues", sendedValues);
+
+        model.addAttribute("openedLabels", openedLabels);
+        model.addAttribute("openedValues", openedValues);
+
+        model.addAttribute("errorLabels", errorLabels);
+        model.addAttribute("errorValues", errorValues);
+
+        model.addAttribute("plannedLabels", plannedLabels);
+        model.addAttribute("plannedValues", plannedValues);
+
+
+        model.addAttribute("labelsJson", labelsJson);
+        model.addAttribute("valuesJson", valuesJson);
+
+      
+     // Dodaj dane do modelu
+        // model.addAttribute("chartData", data);
+        model.addAttribute("outgoingBooks", outgoingBooks);
         model.addAttribute("loggedUser", userPrincipal);
-        model.addAttribute("outgoingBooks", outgoingBookList);
+        model.addAttribute("emailId", id);
         return "campaing-email";
     }
+    
     
     // Wyświetl podstronę z odbiorcami oraz możliwością ich zamiany
     @GetMapping("/kampania/odbiorcy/{id}")
@@ -262,6 +352,7 @@ public class CampaingController {
         CampaignModel findCampaing = campaingService.findOneById(id).orElseThrow(() -> new RuntimeException("Nie znaleziono kampanii"));
         List<RecieversModel> recieversList = recieverService.getRecieversListFromCampaing(findCampaing);
         RecieversModel recieversModel = new RecieversModel();
+        model.addAttribute("campaingId", id);
         model.addAttribute("newRecieversModel", recieversModel);
         model.addAttribute("loggedUser", userPrincipal);
         model.addAttribute("recieversList", recieversList);
@@ -274,7 +365,6 @@ public class CampaingController {
         CampaignModel userCampaing = campaingService.findOneById(id).orElseThrow(() -> new RuntimeException("Nie znaleziono kampanii"));
         Principal userPrincipal = request.getUserPrincipal();
        if(userCampaing.getAccount().getEmail().equals(userPrincipal.getName())){
-      
         try{
 
        
@@ -323,76 +413,4 @@ public class CampaingController {
 
     }
 
-
-    // // Dodaj emaile do kampanii
-    // @PostMapping("/kampania/dodaj-email/{id}")
-    // public String addEmailToCampaing(@PathVariable String id,@ModelAttribute EmailModel emailModel, HttpServletRequest request,Model model) {
-    //    Principal userPrincipal = request.getUserPrincipal();
-    //    CampaignModel campaingToAdd = campaingService.findOneById(id).orElseThrow(() -> new RuntimeException("Nie znaleziono kampanii!"));
-    //    if(userPrincipal.getName().equals(campaingToAdd.getAccount().getEmail())){
-    //    List<EmailModel> listOfEmailsToAdd = campaingToAdd.getEmails();
-    //    listOfEmailsToAdd.add(emailModel);
-    //       return "redirect:/kampanie";
-    //    } else {
-    //     return "unathorized";
-    //    }
-     
-    // }
-    
-    // // Wyświetl dany email z kampanii
-    // @GetMapping("/kampania/email/{id}")
-    // public String getEmailInCampaing(@PathVariable String id, HttpServletRequest request, Model model) {
-    //     Principal userPrincipal = request.getUserPrincipal();
-    //     EmailModel emailToShow = emailRepository.findById(Long.valueOf(id)).orElseThrow(() -> new RuntimeException("Nie znaleziono wiadomości email"));
-    //     model.addAttribute("loggedUser", userPrincipal);
-    //     model.addAttribute("emailToShow", emailToShow);
-
-    //     return "user-campaing-email";
-
-    // }
-
-    // // Procesuj edycje pojedyńczego maila z kampanii
-    // @PostMapping("/kampania/email-edytuj/{id}")
-    // public String changeEmailInCapaing(@PathVariable String id,@ModelAttribute EmailModel emailModel, HttpServletRequest request, Model model) {
-    //     Principal usePrincipal = request.getUserPrincipal();
-    //     EmailModel emailToChange = emailRepository.findById(Long.valueOf(id)).orElseThrow(() -> new RuntimeException("Nie znaleziono wiadomości email"));
-    //     emailToChange.setTitle(emailModel.getTitle());
-    //     emailToChange.setMessageBody(emailModel.getMessageBody());
-    //     emailToChange.setSendDate(emailModel.getSendDate());
-    //     emailToChange.setSendTime(emailModel.getSendTime());
-    //     model.addAttribute("loggedUser", usePrincipal);
-    //     return "redirect:/kampanie";
-    // }
-    
-
-
-    
-
-    // // Usuń konkretnego emaila z kampanii
-    // @PostMapping("/kampania/usun/email/{id}")
-    // public String postMethodName(@PathVariable String id,@RequestParam(name="campaingId") String campaingId,HttpServletRequest request,Model model) {
-    //     Principal userPrincipal = request.getUserPrincipal();
-    //     CampaignModel campaingEmailsToRemove = campaingService.findOneById(campaingId).orElseThrow(() -> new RuntimeException("Nie znaleziono kampanii"));
-    //     if(userPrincipal.getName().equals(campaingEmailsToRemove.getAccount().getEmail())){
-    //         // List<EmailModel> listOfEmailsFromCampaing = campaingEmailsToRemove.getEmails();
-    //         // EmailModel emailToDelete = listOfEmailsFromCampaing.get(Integer.parseInt(id));
-    //         // listOfEmailsFromCampaing.remove(emailToDelete.getId());
-    //         EmailModel emailToDelete = emailRepository.findById(Long.valueOf(id)).orElseThrow(() -> new RuntimeException("Nie znaleziono danego maila"));
-    //         List<OutgoingBook> listOutgoingByEmail = outgoingBookService.getAllOutgoingBookWithCampaing(emailToDelete);
-    //         for(OutgoingBook outgoingToDelete : listOutgoingByEmail){
-    //             outgoingBookRepository.delete(outgoingToDelete);
-    //         }
-    //         emailRepository.delete(emailToDelete);
-    //         campaingRepository.save(campaingEmailsToRemove);
-    //         return "redirect:/kampanie";
-    //     } else {
-    //         return "unauthorized";
-    //     }
-    // }
-    
-    
-    
-    
-    
-    
 }

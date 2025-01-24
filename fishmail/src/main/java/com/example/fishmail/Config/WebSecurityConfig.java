@@ -40,10 +40,16 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+        // SSL
+        http.requiresChannel(customizer -> {
+            customizer.anyRequest().requiresSecure();
+        });
         // CORS
         http.cors(Customizer.withDefaults());
+        
         // Ogólne
         http.authorizeHttpRequests(customizer -> {
+            customizer.requestMatchers(HttpMethod.GET,"/installHooks.js.map").permitAll();
             customizer.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll(); // Zezwól na wszystkie zapytania lokalnych zasobów
             customizer.requestMatchers(HttpMethod.GET,"/image/**").permitAll(); // Zezwól na wszystkie zapytania lokalnych zdjęć
             customizer.requestMatchers(WHITELIST).permitAll(); // Zezwól na wszystkie zapytania z białej listy
@@ -67,6 +73,9 @@ public class WebSecurityConfig {
             customizer.requestMatchers(HttpMethod.POST,"/kampania/zapisz-email/**").hasAnyRole("USER","ADMIN"); // Procesuj dodanie emaili do kampanii
             customizer.requestMatchers(HttpMethod.POST,"/kampania/usun/email/**").hasAnyRole("USER","ADMIN"); // Procesuj usuwanie emaili do kampanii
             customizer.requestMatchers(HttpMethod.GET,"/kampania/odbiorcy/**").hasAnyRole("USER","ADMIN"); // Wyświetl listę odbiorców danej kampanii
+            customizer.requestMatchers(HttpMethod.POST,"/kampania/usun-odbiorce/**").hasAnyRole("USER","ADMIN"); // Usuń konkretnego odbiorcę z danej kampanii
+            customizer.requestMatchers(HttpMethod.POST,"/kampania/edytuj-odbiorce/**").hasAnyRole("USER","ADMIN"); // Procesuj zmianę konkretnego odbiorcy z konkretnej kampanii
+            customizer.requestMatchers(HttpMethod.POST,"/kampania/zamien-odbiorcow/**").hasAnyRole("USER","ADMIN"); // Procesuj zmianę wszystkich odbiorców z pliku oraz inputu
             customizer.requestMatchers(HttpMethod.POST,"/kampania/usun/**").hasAnyRole("USER","ADMIN"); // Usunięcie danej kampanii
             customizer.requestMatchers(HttpMethod.GET,"/kampania/edytuj/**").hasAnyRole("USER","ADMIN"); // Edycja danej kampanii kampanii
             customizer.requestMatchers(HttpMethod.POST,"/kampania/edytuj-kampanie/**").hasAnyRole("USER","ADMIN"); // Procesowanie edycji kampanii
@@ -113,13 +122,13 @@ public class WebSecurityConfig {
         });
         // Wylogowanie
         http.logout(customizer -> {
-            customizer.logoutUrl("/wyloguj").invalidateHttpSession(true).logoutSuccessUrl("/zaloguj?wyloguj").permitAll();
+            customizer.logoutUrl("/wyloguj").invalidateHttpSession(true).logoutSuccessUrl("/zaloguj?wyloguj").clearAuthentication(true).permitAll();
         });
 
         // Sesje
         http.sessionManagement((sessions) -> {
             sessions.sessionConcurrency((session) -> {
-                session.maximumSessions(1).expiredUrl("/zaloguj?wyloguj");
+                session.maximumSessions(1).expiredUrl("/");
             }).sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
         });
 

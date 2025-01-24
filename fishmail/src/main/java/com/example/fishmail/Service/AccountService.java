@@ -28,6 +28,16 @@ public class AccountService {
         return accountRepository.findOneByEmail(email);
     }
 
+    public void saveAccountFirstLoginSmtpProfile(Long accountId,String smtpLogin,String smtpPassword, String smtpHost, int smtpPort){
+      AccountModel accountToUpdate = accountRepository.getReferenceById(accountId);
+      accountToUpdate.setSmtpHost(smtpHost);
+      accountToUpdate.setSmtpLogin(smtpLogin);
+      accountToUpdate.setSmtpPassword(smtpPassword);
+      accountToUpdate.setSmtpPort(smtpPort);
+      accountToUpdate.setFirstLogin(false);
+      accountRepository.save(accountToUpdate);
+    }
+
     public boolean isFirstLogin(String accountEmail){
       AccountModel accountModel =  accountRepository.findOneByEmail(accountEmail).orElseThrow(() -> new RuntimeException("Nie znaleziono konta"));
 

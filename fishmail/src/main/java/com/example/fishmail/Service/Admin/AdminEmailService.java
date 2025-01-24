@@ -57,9 +57,9 @@ public class AdminEmailService {
         "<p>Dziękujemy za zaufanie dla produktu FishMail!</p>" +
         "<p>Mamy nadzieje, że nasze rozwiązanie przeznaczone do e-commerce, poszerzy znacznie grono twoich klientów!</p>" +
         "<p>Poniżej przesyłamy link aktywacyjny dla konta w serwisie FishMail. Pamiętaj o tym, że aktywacyjny jest aktywny przez 12 godzin!</p>" +
-        "<a href='http://localhost:9000/aktywuj-konto?activationId=" + link.getActivationCode() +"'>Aktywuj konto</a>" +
+        "<a href='https://fishmail.fishweb.pl/aktywuj-konto?activationId=" + link.getActivationCode() +"'>Aktywuj konto</a>" +
         "<p>W przypadku przekroczenia czasu ważności linku aktywacyjnego kliknij w link poniżej, aby poprosić o przysłanie nowego.</p>" +
-        "<a href='http://localhost:9000/wyslij-link-aktywacyjny'>Poproś o wysłanie linku aktywacyjnego raz jeszcze</a>" +
+        "<a href='https://fishmail.fishweb.pl/wyslij-link-aktywacyjny'>Poproś o wysłanie linku aktywacyjnego raz jeszcze</a>" +
         "<p>Pozdrawiamy,</p>" +
         "<p>Ekipa Fishweb</p>" +
         "</body>" +

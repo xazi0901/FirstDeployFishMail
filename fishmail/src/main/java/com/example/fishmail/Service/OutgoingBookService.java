@@ -91,9 +91,18 @@ public class OutgoingBookService {
 
 
         public List<OutgoingBook> getAllOutgoingBooksForEmailCampaing(String id ){
-            List<OutgoingBook> outgoingBookForEmail = outgoingBookRepository.findAllByEmailId(Long.parseLong(id));
-            return outgoingBookForEmail;
+                try {
+        Long emailId = Long.parseLong(id); // Walidacja ID
+        return outgoingBookRepository.findAllByEmailId(emailId);
+    } catch (NumberFormatException e) {
+        throw new IllegalArgumentException("Invalid ID: " + id);
+    }
+            //   System.out.println("Received ID: " + id);
+            // List<OutgoingBook> outgoingBookForEmail = outgoingBookRepository.findAllByEmailId(Long.parseLong(id));
+            // return outgoingBookForEmail;
         }
+
+        
 
 
         public void updateOutGoingBookAndCheckEmailStatus(OutgoingBookDTO outgoingBookDTO){
